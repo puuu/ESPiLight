@@ -34,6 +34,6 @@
 
 #include "../../../../tools/aprintf.h"
 
-#define logprintf(prio, format_str, args...) {printf("LOG(%i): ", prio);printf(format_str, ##args);printf('\n');}
+#define logprintf(prio, args...) {printf("\nLOG(%i): ", prio);printf(args);printf("\n");}
 
 #endif
