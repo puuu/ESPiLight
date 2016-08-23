@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with library. If not, see <http://www.gnu.org/licenses/>
 
+DIR_NAME = $(lastword $(subst /, ,$(CURDIR)))
+
 SRC_DIR = pilight
 
 DST_DIR = src/pilight
@@ -32,7 +34,7 @@ FILES = $(PILIGHT_FILES) $(PROTOCOL_H_FILES) $(PROTOCOL_C_FILES)
 
 DST_FILES = $(foreach file,$(FILES),$(DST_DIR)/$(file))
 
-.PHONY: all clean copy update
+.PHONY: all clean copy update zip
 
 all: $(SRC_DIR)/libs
 	$(MAKE) -e copy
@@ -64,11 +66,16 @@ $(DST_DIR)/libs/pilight/protocols/protocol_init.h: $(foreach file,$(PROTOCOL_C_F
 pilight/libs:
 	git submodule update --init pilight
 
+release/$(DIR_NAME).zip: $(SRC_DIR)/libs $(DST_FILES)
+	@mkdir -p $(@D)
+	cd ..; zip -9r $(DIR_NAME)/$@ $(DIR_NAME) -x "*~" "$(DIR_NAME)/$(@D)/*" "$(DIR_NAME)/.git/*" "$(DIR_NAME)/$(SRC_DIR)/*"
 
 update:
 	$(MAKE) clean
 	git submodule update pilight
 	$(MAKE) copy
 
+zip: release/$(DIR_NAME).zip
+
 clean:
-	-rm $(DST_FILES)
+	-rm $(DST_FILES) release/$(DIR_NAME).zip

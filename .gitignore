@@ -1,4 +1,5 @@
 *~
+release/*
 src/pilight/libs/pilight/core/binary.c
 src/pilight/libs/pilight/core/binary.h
 src/pilight/libs/pilight/core/dso.h
