@@ -1,0 +1,15 @@
+{
+    "name": "ESPiLight",
+    "keywords": "pilight, 433MHz, 434MHz, rf",
+    "description": "pilight 433.92 MHz protocols library for Arduino",
+    "repository":
+    {
+        "type": "git",
+        "url": "https://github.com/puuu/ESPiLight.git"
+    },
+    "version": "0.9.0",
+    "downloadUrl": "https://github.com/puuu/ESPiLight/releases/download/v0.9.0/ESPiLight.zip",
+    "license": "GPL-3.0",
+    "frameworks": "arduino",
+    "platforms": "espressif"
+}
