@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/puuu/ESPiLight.svg?branch=master)](https://travis-ci.org/puuu/ESPiLight)
+
 # ESPiLight
 
 This Arduino library is a port of the [pilight](https://pilight.org/)
