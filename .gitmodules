@@ -1,4 +1,4 @@
 [submodule "pilight"]
 	path = pilight
-	url = https://github.com/pilight/pilight
-	branch = development
+	url = https://github.com/puuu/pilight
+	branch = mypatches
