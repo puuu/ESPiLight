@@ -32,7 +32,7 @@ FILES = $(PILIGHT_FILES) $(PROTOCOL_H_FILES) $(PROTOCOL_C_FILES)
 
 DST_FILES = $(foreach file,$(FILES),$(DST_DIR)/$(file))
 
-.PHONY: all clean copy update
+.PHONY: all clean copy update release
 
 all: $(SRC_DIR)/libs
 	$(MAKE) -e copy
@@ -64,11 +64,21 @@ $(DST_DIR)/libs/pilight/protocols/protocol_init.h: $(foreach file,$(PROTOCOL_C_F
 pilight/libs:
 	git submodule update --init pilight
 
-
 update:
 	$(MAKE) clean
 	git submodule update pilight
 	$(MAKE) copy
+
+release: $(SRC_DIR)/libs
+	git checkout release
+	git merge master
+	make update
+	git add src/pilight
+	git commit -m "integrate new pilight files"
+	@echo "change log:"
+	@git log --pretty="* %s" --no-merges HEAD...`git describe --abbrev=0 --tags`
+	@git submodule summary `git describe --abbrev=0 --tags`
+	@echo "run: git tag -a v"`grep version library.properties | sed 's/version=\(.*\)/\1/g'`
 
 clean:
 	-rm $(DST_FILES)
