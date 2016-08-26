@@ -8,7 +8,6 @@
         "url": "https://github.com/puuu/ESPiLight.git"
     },
     "version": "0.9.1",
-    "downloadUrl": "https://github.com/puuu/ESPiLight/releases/download/v0.9.1/ESPiLight.zip",
     "license": "GPL-3.0",
     "frameworks": "arduino",
     "platforms": "espressif"
