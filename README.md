@@ -59,6 +59,15 @@ information can be found here:
 - https://github.com/sui77/rc-switch/wiki/List_TransmitterReceiverModules
 
 
+## Contributing
+
+If you find any bug, feel free to open an issue at github.  Also, pull
+requests are welcome. The development takes place in the `matser`
+branch. The `release` is used to integrate the pilight files and for
+version tagging, like necessary for the Arduino Library Manager
+crawler.
+
+
 ## Acknowledgement
 
 Big thanks goes to the pilight community, which implemented all the
