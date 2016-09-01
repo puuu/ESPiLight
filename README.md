@@ -18,28 +18,10 @@ A list of supported protocols can be found in the pilight wiki:
 https://wiki.pilight.org/doku.php/protocols
 
 
-## Install from source
+## Installation
 
-To use this library, you need to integrate the pilight source
-files. Since Arduino build all cpp/c files in the src directory and
-sub directories, only necessary files from pilight will be integrated.
-This will be done with GNU make.
+This library can be easily installed with the Arduino Library Manager.
 
-On Linux you can run:
-```console
-$ git clone https://github.com/puuu/ESPiLight/
-$ cd ESPiLight
-$ make
-$ ln -s `pwd` ~/Arduino/libraries/
-```
-
-### Update
-
-To update EPiLight from git run:
-```console
-$ git pull
-$ make update
-```
 
 ## Usage
 
@@ -66,6 +48,31 @@ requests are welcome. The development takes place in the `matser`
 branch. The `release` is used to integrate the pilight files and for
 version tagging, like necessary for the Arduino Library Manager
 crawler.
+
+
+### Install from source
+
+If you are interested to install this library from source, you need to
+integrate the pilight source files. Since Arduino build all cpp/c
+files in the src directory and sub directories, only necessary files
+from pilight will be integrated.  This will be done with GNU make.
+
+On Linux you can run:
+```console
+$ git clone https://github.com/puuu/ESPiLight/
+$ cd ESPiLight
+$ make
+$ ln -s `pwd` ~/Arduino/libraries/
+```
+
+
+#### Update
+
+To update EPiLight from git run:
+```console
+$ git pull
+$ make update
+```
 
 
 ## Acknowledgement
