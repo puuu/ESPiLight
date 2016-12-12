@@ -43,7 +43,7 @@
 	9	low battery indicator
 	12	1 indicates TX button press on sensor
 	17-24	humidity
-	25-36	temperature
+	25-36	temperature (signed int12)
 */
 
 typedef struct settings_t {
@@ -70,7 +70,7 @@ static void parseCode(void) {
 	double humi_offset = 0.0, temp_offset = 0.0;
 	double temperature = 0.0, humidity = 0.0;
 	int binary[RAW_LENGTH/2];
-	int id = 0, temp = 0, button = 0, battery = 0;
+	int id = 0, button = 0, battery = 0;
 	int i = 0, x = 0;
 
 	if(tcm->rawlen>RAW_LENGTH) {
@@ -92,8 +92,7 @@ static void parseCode(void) {
 
 	humidity = binToDecRev(binary, 16, 23);
 
-	temp = binToDecRev(binary, 24, 35);
-	temperature = temp;
+	temperature = binToSignedRev(binary, 24, 35);
 
 	struct settings_t *tmp = settings;
 	while(tmp) {
@@ -214,7 +213,7 @@ void tcmInit(void) {
 #if defined(MODULE) && !defined(_WIN32)
 void compatibility(struct module_t *module) {
 	module->name = "tcm";
-	module->version = "1.1";
+	module->version = "1.3";
 	module->reqversion = "6.0";
 	module->reqcommit = "84";
 }
