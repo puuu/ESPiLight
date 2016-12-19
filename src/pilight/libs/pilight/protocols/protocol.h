@@ -22,6 +22,7 @@
 //from ../core/options.h
 #define options_add(options, id, name, argtype, conftype, vartype, def, mask)
 
+#include <stdint.h>
 #include "../core/json.h"
 
 // from ../config/hardware.h
@@ -78,7 +79,7 @@ typedef struct protocol_t {
   unsigned long first;
   unsigned long second;
 
-  int *raw;
+  uint16_t *raw;
 
   hwtype_t hwtype;
   devtype_t devtype;
