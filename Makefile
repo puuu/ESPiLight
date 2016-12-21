@@ -19,7 +19,7 @@ SRC_DIR = pilight
 DST_DIR = src/pilight
 PROTOCOL_DIR = libs/pilight/protocols/433.92
 
-PROTOCOLS = $(patsubst $(SRC_DIR)/$(PROTOCOL_DIR)/%.h,%,$(wildcard $(SRC_DIR)/$(PROTOCOL_DIR)/*.h))
+PROTOCOLS = $(patsubst $(SRC_DIR)/$(PROTOCOL_DIR)/%.h,%,$(sort $(wildcard $(SRC_DIR)/$(PROTOCOL_DIR)/*.h)))
 
 PILIGHT_FILES = libs/pilight/core/dso.h libs/pilight/core/mem.h	\
 	libs/pilight/core/json.h libs/pilight/core/json.c	\

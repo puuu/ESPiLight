@@ -25,19 +25,19 @@
 
 #define MIN_PULSELENGTH       80
 #define MAX_PULSELENGTH       16000
-#define MAXPULSESTREAMLENGTH  256
+#define MAXPULSESTREAMLENGTH  255
 
 #define MAX_PULSE_TYPES       16
 
 enum PilightRepeatStatus_t {FIRST, INVALID, VALID, KNOWN};
 
 typedef struct PulseTrain_t {
-  int pulses[MAXPULSESTREAMLENGTH];
-  int length;
+  uint16_t pulses[MAXPULSESTREAMLENGTH];
+  uint8_t length;
 } PulseTrain_t;
 
 typedef void (*ESPiLightCallBack)(const String &protocol, const String &message, int status, int repeats, const String &deviceID);
-typedef void (*PulseTrainCallBack)(const int* pulses, int length);
+typedef void (*PulseTrainCallBack)(const uint16_t* pulses, int length);
 
 class ESPiLight {
  public:
@@ -49,7 +49,7 @@ class ESPiLight {
   /**
    * Transmit pulse train
    */
-  void sendPulseTrain(const int *pulses, int length, int repeats=10);
+  void sendPulseTrain(const uint16_t *pulses, int length, int repeats=10);
 
   /**
    * Transmit Pilight json message
@@ -59,7 +59,7 @@ class ESPiLight {
   /**
    * Parse pulse train and fire callback
    */
-  int parsePulseTrain(int *pulses, int length);
+  int parsePulseTrain(uint16_t *pulses, int length);
 
   /**
    * Process receiver queue and fire callback
@@ -78,7 +78,7 @@ class ESPiLight {
    * Get last received PulseTrain.
    * Returns: length of PulseTrain or 0 if not avaiable
    */
-  static int receivePulseTrain(int *pulses);
+  static int receivePulseTrain(uint16_t *pulses);
 
   /**
    * Check if new PulseTrain avaiable.
@@ -107,10 +107,10 @@ class ESPiLight {
   static unsigned int mingaplen;
   static unsigned int maxgaplen;
 
-  static String pulseTrainToString(const int *pulses, int length);
-  static int stringToPulseTrain(const String &data, int *pulses, int maxlength);
+  static String pulseTrainToString(const uint16_t *pulses, int length);
+  static int stringToPulseTrain(const String &data, uint16_t *pulses, int maxlength);
 
-  static int createPulseTrain(int *pulses, const String &protocol_id, const String &json);
+  static int createPulseTrain(uint16_t *pulses, const String &protocol_id, const String &json);
 
  private:
   ESPiLightCallBack _callback;

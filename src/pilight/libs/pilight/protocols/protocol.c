@@ -37,8 +37,8 @@ void protocol_register(protocol_t **proto) {
     fprintf(stderr, "out of memory\n");
     exit(EXIT_FAILURE);
   }
-  (*proto)->options = NULL;
-  (*proto)->devices = NULL;
+  //(*proto)->options = NULL;
+  //(*proto)->devices = NULL;
 
   (*proto)->rawlen = 0;
   (*proto)->minrawlen = 0;
@@ -48,18 +48,18 @@ void protocol_register(protocol_t **proto) {
   (*proto)->txrpt = 10;
   (*proto)->rxrpt = 1;
   (*proto)->hwtype = NONE;
-  (*proto)->multipleId = 1;
-  (*proto)->config = 1;
-  (*proto)->masterOnly = 0;
+  //(*proto)->multipleId = 1;
+  //(*proto)->config = 1;
+  //(*proto)->masterOnly = 0;
   (*proto)->parseCode = NULL;
   (*proto)->createCode = NULL;
   (*proto)->checkValues = NULL;
-  (*proto)->initDev = NULL;
+  //(*proto)->initDev = NULL;
   (*proto)->printHelp = NULL;
-  (*proto)->threadGC = NULL;
+  //(*proto)->threadGC = NULL;
   (*proto)->gc = NULL;
   (*proto)->message = NULL;
-  (*proto)->threads = NULL;
+  //(*proto)->threads = NULL;
 
   (*proto)->repeats = 0;
   (*proto)->first = 0;

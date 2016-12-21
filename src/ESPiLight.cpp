@@ -48,7 +48,7 @@ void ESPiLight::initReceiver(byte inputPin) {
   }
 }
 
-int ESPiLight::receivePulseTrain(int *pulses) {
+int ESPiLight::receivePulseTrain(uint16_t *pulses) {
   int i = 0;
   int length = nextPulseTrainLength();
 
@@ -76,7 +76,7 @@ void ESPiLight::interruptHandler() {
   unsigned int duration = 0;
 
   volatile PulseTrain_t &pulseTrain = _pulseTrains[_actualPulseTrain];
-  volatile int *codes = pulseTrain.pulses;
+  volatile uint16_t *codes = pulseTrain.pulses;
 
   if(pulseTrain.length == 0) {
     duration = now - _lastChange;
@@ -127,7 +127,7 @@ void ESPiLight::disableReceiver() {
 
 void ESPiLight::loop() {
   int length = 0;
-  int pulses[MAXPULSESTREAMLENGTH];
+  uint16_t pulses[MAXPULSESTREAMLENGTH];
 
   length = receivePulseTrain(pulses);
 
@@ -165,7 +165,7 @@ void ESPiLight::setPulseTrainCallBack(PulseTrainCallBack rawCallback) {
   _rawCallback = rawCallback;
 }
 
-void ESPiLight::sendPulseTrain(const int *pulses, int length, int repeats) {
+void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length, int repeats) {
   boolean receiverState = _enabledReceiver;
   int r = 0, x = 0;
   if(_outputPin >= 0) {
@@ -188,7 +188,7 @@ void ESPiLight::sendPulseTrain(const int *pulses, int length, int repeats) {
 
 int ESPiLight::send(const String &protocol, const String &json, int repeats) {
   int length = 0;
-  int pulses[MAXPULSESTREAMLENGTH];
+  uint16_t pulses[MAXPULSESTREAMLENGTH];
 
   length = createPulseTrain(pulses, protocol, json);
   if(length > 0) {
@@ -207,7 +207,7 @@ int ESPiLight::send(const String &protocol, const String &json, int repeats) {
   return length;
 }
 
-int ESPiLight::createPulseTrain(int *pulses, const String &protocol_id,
+int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
 				const String &content) {
   struct protocol_t *protocol = NULL;
   struct protocols_t *pnode = protocols;
@@ -252,7 +252,7 @@ int ESPiLight::createPulseTrain(int *pulses, const String &protocol_id,
   return 0;
 }
 
-int ESPiLight::parsePulseTrain(int *pulses, int length) {
+int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
   int matches = 0;
   struct protocol_t *protocol = NULL;
   struct protocols_t *pnode = protocols;
@@ -347,7 +347,7 @@ static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback) {
 }
 
 
-String ESPiLight::pulseTrainToString(const int *codes, int length) {
+String ESPiLight::pulseTrainToString(const uint16_t *codes, int length) {
   int i = 0, x = 0, match = 0;
   int diff=0;
   int plstypes[MAX_PULSE_TYPES];
@@ -397,7 +397,7 @@ String ESPiLight::pulseTrainToString(const int *codes, int length) {
   return data;
 }
 
-int ESPiLight::stringToPulseTrain(const String &data, int *codes, int maxlength) {
+int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes, int maxlength) {
   int start = 0, end = 0, pulse_index;
   int i = 0;
   int plstypes[MAX_PULSE_TYPES];
