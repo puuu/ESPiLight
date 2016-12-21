@@ -62,20 +62,20 @@ typedef enum {
 
 typedef struct protocol_t {
   char *id;
-  int rawlen;
-  int minrawlen;
-  int maxrawlen;
-  int mingaplen;
-  int maxgaplen;
-  short txrpt;
-  short rxrpt;
-  short multipleId;
-  short config;
-  short masterOnly;
-  struct options_t *options;
+  uint8_t rawlen;
+  uint8_t minrawlen;
+  uint8_t maxrawlen;
+  uint16_t mingaplen;
+  uint16_t maxgaplen;
+  uint8_t txrpt;
+  uint8_t rxrpt;
+  //short multipleId;
+  //short config;
+  //short masterOnly;
+  //struct options_t *options;
   struct JsonNode *message;
 
-  int repeats;
+  uint8_t repeats;
   unsigned long first;
   unsigned long second;
 
@@ -83,8 +83,8 @@ typedef struct protocol_t {
 
   hwtype_t hwtype;
   devtype_t devtype;
-  struct protocol_devices_t *devices;
-  struct protocol_threads_t *threads;
+  //struct protocol_devices_t *devices;
+  //struct protocol_threads_t *threads;
 
   union {
     void (*parseCode)(void);
@@ -93,10 +93,10 @@ typedef struct protocol_t {
   int (*validate)(void);
   int (*createCode)(JsonNode *code);
   int (*checkValues)(JsonNode *code);
-  struct threadqueue_t *(*initDev)(JsonNode *device);
+  //struct threadqueue_t *(*initDev)(JsonNode *device);
   void (*printHelp)(void);
   void (*gc)(void);
-  void (*threadGC)(void);
+  //void (*threadGC)(void);
 
   /* ESPiLight special, used to compare repeated messages*/
   char *old_content;
