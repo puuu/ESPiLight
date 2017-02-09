@@ -19,4 +19,5 @@ void loop() {
   rf.send("elro_800_switch", "{\"systemcode\":17,\"unitcode\":1,\"on\":1}");
   delay(2000);
   rf.send("elro_800_switch", "{\"systemcode\":17,\"unitcode\":1,\"off\":1}");
+  delay(2000);
 }
