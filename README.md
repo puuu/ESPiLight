@@ -44,7 +44,7 @@ information can be found here:
 ## Contributing
 
 If you find any bug, feel free to open an issue at github.  Also, pull
-requests are welcome. The development takes place in the `matser`
+requests are welcome. The development takes place in the `master`
 branch. The `release` is used to integrate the pilight files and for
 version tagging, like necessary for the Arduino Library Manager
 crawler.
