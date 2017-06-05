@@ -404,7 +404,6 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes, int maxle
   int start = 0, end = 0, pulse_index;
   int i = 0;
   int plstypes[MAX_PULSE_TYPES];
-  char buf[10];
 
   for(i=0;i<MAX_PULSE_TYPES;i++) {
     plstypes[i] = 0;
