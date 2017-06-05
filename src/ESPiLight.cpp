@@ -237,6 +237,9 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
       message = json_decode(content.c_str());
       return_value = protocol->createCode(message);
       json_delete(message);
+      // delete message created by createCode()
+      json_delete(protocol->message);
+      protocol->message = NULL;
 
       if (return_value == EXIT_SUCCESS) {
 	Serial.println(" create Code succeded.");
