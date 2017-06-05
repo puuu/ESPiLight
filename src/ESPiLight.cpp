@@ -146,7 +146,7 @@ void ESPiLight::loop() {
   }
 }
 
-ESPiLight::ESPiLight(byte outputPin) {
+ESPiLight::ESPiLight(int8_t outputPin) {
   _outputPin = outputPin;
   _callback = NULL;
   _rawCallback = NULL;
