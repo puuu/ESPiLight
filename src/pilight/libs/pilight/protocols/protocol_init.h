@@ -25,6 +25,7 @@ eurodomestSwitchInit();
 ev1527Init();
 heitechInit();
 impulsInit();
+livoloSwitchInit();
 logilinkSwitchInit();
 mumbiInit();
 ninjablocksWeatherInit();
