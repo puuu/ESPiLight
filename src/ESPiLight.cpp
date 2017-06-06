@@ -146,7 +146,7 @@ void ESPiLight::loop() {
   }
 }
 
-ESPiLight::ESPiLight(byte outputPin) {
+ESPiLight::ESPiLight(int8_t outputPin) {
   _outputPin = outputPin;
   _callback = NULL;
   _rawCallback = NULL;
@@ -237,6 +237,9 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
       message = json_decode(content.c_str());
       return_value = protocol->createCode(message);
       json_delete(message);
+      // delete message created by createCode()
+      json_delete(protocol->message);
+      protocol->message = NULL;
 
       if (return_value == EXIT_SUCCESS) {
 	Serial.println(" create Code succeded.");
@@ -399,9 +402,8 @@ String ESPiLight::pulseTrainToString(const uint16_t *codes, int length) {
 
 int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes, int maxlength) {
   int start = 0, end = 0, pulse_index;
-  int i = 0;
+  unsigned int i = 0;
   int plstypes[MAX_PULSE_TYPES];
-  char buf[10];
 
   for(i=0;i<MAX_PULSE_TYPES;i++) {
     plstypes[i] = 0;
@@ -409,8 +411,8 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes, int maxle
 
   int scode = data.indexOf('c')+2;
   int spulse = data.indexOf('p')+2;
-  if(scode > 0 && scode < data.length() &&
-     spulse > 0 && spulse < data.length()) {
+  if(scode > 0 && (unsigned) scode < data.length() &&
+     spulse > 0 && (unsigned) spulse < data.length()) {
     int nrpulses = 0;
     start = spulse;
     end = data.indexOf(',', start);
@@ -430,7 +432,7 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes, int maxle
     for(i = scode; i < data.length(); i++) {
       if((data[i] == ';') || (data[i] == '@'))
 	break;
-      if(i >= maxlength)
+      if(i >= (unsigned) maxlength)
 	break;
       pulse_index = data[i] - '0';
       if((pulse_index < 0) || (pulse_index >= nrpulses))

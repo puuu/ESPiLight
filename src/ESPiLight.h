@@ -44,7 +44,7 @@ class ESPiLight {
   /**
    * Constructor.
    */
-  ESPiLight(byte outputPin);
+  ESPiLight(int8_t outputPin);
 
   /**
    * Transmit pulse train
@@ -115,7 +115,7 @@ class ESPiLight {
  private:
   ESPiLightCallBack _callback;
   PulseTrainCallBack _rawCallback;
-  byte _outputPin;
+  int8_t _outputPin;
 
   /**
    * Quasi-reset. Called when the current edge is too long or short.

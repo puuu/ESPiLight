@@ -19,22 +19,9 @@
 #ifndef _APRINTF_H_
 #define _APRINTF_H_
 
-#define PILIGHT_PRINT Serial
+#include <stdio.h>
 
-#ifdef PILIGHT_PRINT
-  #define printf(args...) aprintf(args)
-  #define fprintf(stream, args...) aprintf(args)
-    #ifdef __cplusplus
-      extern "C" {
-    #endif
-    int aprintf(const char *format, ...);
-    #ifdef __cplusplus
-      }
-    #endif
-#else
-    #define printf(format, ...)
-    #define fprintf(stream, format, ...)
-#endif
+#define fprintf(stream, args...) printf(args)
 
 #ifdef __cplusplus
   extern "C" {

@@ -19,8 +19,6 @@
 #ifndef _LOG_H_
 #define _LOG_H_
 
-#define PILIGHT_LOG Serial
-
 #define LOG_EMERG       0
 #define LOG_ALERT       1
 #define LOG_CRIT        2
@@ -32,8 +30,8 @@
 
 #define LOG_STACK               255
 
-#include "../../../../tools/aprintf.h"
+#include <stdio.h>
 
-#define logprintf(prio, args...) {printf("\nLOG(%i): ", prio);printf(args);printf("\n");}
+#define logprintf(prio, args...) {printf("\nLOG(%d): ", prio);printf(args);printf("\n");}
 
 #endif
