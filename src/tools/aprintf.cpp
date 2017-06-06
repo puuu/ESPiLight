@@ -19,21 +19,6 @@
 #include <Arduino.h>
 #include "aprintf.h"
 
-#ifdef PILIGHT_PRINT
-
-#define BUFFER_SIZE 32
-
-int aprintf(const char *format, ...) {
-  char buffer[BUFFER_SIZE] = {0};
-  va_list args;
-  va_start(args, format);
-  vsnprintf(buffer, BUFFER_SIZE, format, args);
-  va_end(args);
-  PILIGHT_PRINT.print(buffer);
-}
-
 void exit(int n) {
   ESP.restart();
 }
-
-#endif
