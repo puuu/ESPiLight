@@ -151,8 +151,10 @@ ESPiLight::ESPiLight(int8_t outputPin) {
   _callback = NULL;
   _rawCallback = NULL;
 
-  pinMode(_outputPin, OUTPUT);
-  digitalWrite(_outputPin, LOW);
+  if(_outputPin >= 0) {
+    pinMode(_outputPin, OUTPUT);
+    digitalWrite(_outputPin, LOW);
+  }
 
   if (protocols == NULL) protocol_init();
 }
