@@ -67,7 +67,7 @@ int ESPiLight::nextPulseTrainLength() {
   return _pulseTrains[_avaiablePulseTrain].length;
 }
 
-void ESPiLight::interruptHandler() {
+void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
   if (!_enabledReceiver) {
     return;
   }
