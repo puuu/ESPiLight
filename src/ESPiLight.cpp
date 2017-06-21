@@ -67,7 +67,7 @@ int ESPiLight::nextPulseTrainLength() {
   return _pulseTrains[_avaiablePulseTrain].length;
 }
 
-void ESPiLight::interruptHandler() {
+void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
   if (!_enabledReceiver) {
     return;
   }
@@ -151,8 +151,10 @@ ESPiLight::ESPiLight(int8_t outputPin) {
   _callback = NULL;
   _rawCallback = NULL;
 
-  pinMode(_outputPin, OUTPUT);
-  digitalWrite(_outputPin, LOW);
+  if(_outputPin >= 0) {
+    pinMode(_outputPin, OUTPUT);
+    digitalWrite(_outputPin, LOW);
+  }
 
   if (protocols == NULL) protocol_init();
 }
@@ -166,7 +168,7 @@ void ESPiLight::setPulseTrainCallBack(PulseTrainCallBack rawCallback) {
 }
 
 void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length, int repeats) {
-  boolean receiverState = _enabledReceiver;
+  //boolean receiverState = _enabledReceiver;
   int r = 0, x = 0;
   if(_outputPin >= 0) {
     //disableReceiver()

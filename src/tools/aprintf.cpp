@@ -20,5 +20,8 @@
 #include "aprintf.h"
 
 void exit(int n) {
+  Serial.print(F("EXIT: "));
+  Serial.println(n);    
   ESP.restart();
+  while(true);
 }
