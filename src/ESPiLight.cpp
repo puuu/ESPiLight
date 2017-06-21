@@ -168,7 +168,7 @@ void ESPiLight::setPulseTrainCallBack(PulseTrainCallBack rawCallback) {
 }
 
 void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length, int repeats) {
-  boolean receiverState = _enabledReceiver;
+  //boolean receiverState = _enabledReceiver;
   int r = 0, x = 0;
   if(_outputPin >= 0) {
     //disableReceiver()
