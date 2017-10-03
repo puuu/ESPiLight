@@ -10,5 +10,9 @@
     "version": "0.11.2",
     "license": "GPL-3.0",
     "frameworks": "arduino",
-    "platforms": "espressif"
+    "platforms":
+    [
+        "espressif8266",
+        "espressif32"
+    ]
 }
