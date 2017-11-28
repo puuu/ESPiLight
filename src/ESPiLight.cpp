@@ -18,37 +18,36 @@
 
 #include <ESPiLight.h>
 
-
 #ifdef DEBUG
-#define Debug(x) Debug(x)
-#define DebugLn(x) DebugLn(x)
+#define Debug(x) Serial.print(x)
+#define DebugLn(x) Serial.println(x)
 #else
 #define Debug(x)
 #define DebugLn(x)
 #endif
 
-
 extern "C" {
 #include "pilight/libs/pilight/protocols/protocol.h"
 }
-struct protocols_t *protocols = NULL;
+struct protocols_t *protocols = nullptr;
+struct protocols_t *used_protocols = nullptr;
 
 volatile PulseTrain_t ESPiLight::_pulseTrains[RECEIVER_BUFFER_SIZE];
-boolean ESPiLight::_enabledReceiver;
+bool ESPiLight::_enabledReceiver;
 volatile int ESPiLight::_actualPulseTrain = 0;
 int ESPiLight::_avaiablePulseTrain = 0;
 volatile unsigned long ESPiLight::_lastChange = 0; // Timestamp of previous edge
 volatile uint8_t ESPiLight::_nrpulses = 0;
 
-unsigned int ESPiLight::minrawlen = 5;
-unsigned int ESPiLight::maxrawlen = MAXPULSESTREAMLENGTH;
-unsigned int ESPiLight::mingaplen = 5100;
-unsigned int ESPiLight::maxgaplen = 10000;
+uint8_t ESPiLight::minrawlen = 20;
+uint8_t ESPiLight::maxrawlen = MAXPULSESTREAMLENGTH;
+uint16_t ESPiLight::mingaplen = 5100;
+uint16_t ESPiLight::maxgaplen = 10000;
 
 static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback);
 
 void ESPiLight::initReceiver(byte inputPin) {
-  int interrupt = digitalPinToInterrupt(inputPin);
+  auto interrupt = (uint8_t) digitalPinToInterrupt(inputPin);
 
   resetReceiver();
   enableReceiver();
@@ -58,14 +57,13 @@ void ESPiLight::initReceiver(byte inputPin) {
   }
 }
 
-int ESPiLight::receivePulseTrain(uint16_t *pulses) {
-  int i = 0;
-  int length = nextPulseTrainLength();
+uint8_t ESPiLight::receivePulseTrain(uint16_t *pulses) {
+  const uint8_t length = nextPulseTrainLength();
 
   if (length > 0) {
     volatile PulseTrain_t &pulseTrain = _pulseTrains[_avaiablePulseTrain];
     _avaiablePulseTrain = (_avaiablePulseTrain + 1) % RECEIVER_BUFFER_SIZE;
-    for (i = 0; i < length; i++) {
+    for (uint8_t i = 0; i < length; ++i) {
       pulses[i] = pulseTrain.pulses[i];
     }
     pulseTrain.length = 0;
@@ -73,7 +71,7 @@ int ESPiLight::receivePulseTrain(uint16_t *pulses) {
   return length;
 }
 
-int ESPiLight::nextPulseTrainLength() {
+uint8_t ESPiLight::nextPulseTrainLength() {
   return _pulseTrains[_avaiablePulseTrain].length;
 }
 
@@ -155,17 +153,35 @@ void ESPiLight::loop() {
   }
 }
 
-ESPiLight::ESPiLight(int8_t outputPin) {
+ESPiLight::ESPiLight(uint8_t outputPin) {
   _outputPin = outputPin;
-  _callback = NULL;
-  _rawCallback = NULL;
+  _callback = nullptr;
+  _rawCallback = nullptr;
 
   if (_outputPin >= 0) {
     pinMode(_outputPin, OUTPUT);
     digitalWrite(_outputPin, LOW);
   }
 
-  if (protocols == NULL) protocol_init();
+  if (protocols == nullptr) {
+    protocol_init();
+
+    used_protocols = nullptr;
+    struct protocols_t *pnode = protocols;
+    while (pnode != nullptr) {
+      auto *new_node = static_cast<protocols_t *>(malloc(sizeof(struct protocols_t)));
+
+      if (new_node == nullptr) {
+        DebugLn("out of memory");
+        return;
+      }
+      new_node->listener = pnode->listener;
+      new_node->next = used_protocols;
+      used_protocols = new_node;
+
+      pnode = pnode->next;
+    }
+  }
 }
 
 void ESPiLight::setCallback(ESPiLightCallBack callback) {
@@ -194,7 +210,6 @@ void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length, int repeats) 
     digitalWrite(_outputPin, LOW);
     //if (receiverState) enableReceiver();
   }
-  return;
 }
 
 int ESPiLight::send(const String &protocol, const String &json, int repeats) {
@@ -221,13 +236,13 @@ int ESPiLight::send(const String &protocol, const String &json, int repeats) {
 int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
                                 const String &content) {
   struct protocol_t *protocol = NULL;
-  struct protocols_t *pnode = protocols;
+  struct protocols_t *pnode = used_protocols;
   int return_value = EXIT_FAILURE;
   JsonNode *message;
 
   Debug("piLightCreatePulseTrain: ");
 
-  if (json_validate(content.c_str()) != true) {
+  if (!json_validate(content.c_str())) {
     Debug("invalid json: ");
     DebugLn(content);
     return -2;
@@ -265,10 +280,10 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
   return 0;
 }
 
-int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
+int ESPiLight::parsePulseTrain(uint16_t *pulses, uint8_t length) {
   int matches = 0;
   struct protocol_t *protocol = NULL;
-  struct protocols_t *pnode = protocols;
+  struct protocols_t *pnode = used_protocols;
 
   //DebugLn("piLightParsePulseTrain start");
   while ((pnode != NULL) && (_callback != NULL)) {
@@ -295,7 +310,7 @@ int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
         }
 
         /* Reset # of repeats after a certain delay */
-        if (((int) protocol->second - (int) protocol->first) > 500000) {
+        if (((int) protocol->second - (int) protocol->first) > 300000) {
           protocol->repeats = 0;
         }
 
@@ -355,8 +370,8 @@ static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback) {
   (callback)(String(protocol->id), String(protocol->old_content), status, protocol->repeats, deviceId);
 }
 
-String ESPiLight::pulseTrainToString(const uint16_t *codes, int length) {
-  int i = 0, x = 0, match = 0;
+String ESPiLight::pulseTrainToString(const uint16_t *codes, unsigned int length) {
+  unsigned int i = 0, x = 0, match = 0;
   int diff = 0;
   int plstypes[MAX_PULSE_TYPES];
   String data("");
@@ -405,7 +420,7 @@ String ESPiLight::pulseTrainToString(const uint16_t *codes, int length) {
   return data;
 }
 
-int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes, int maxlength) {
+int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes, unsigned int maxlength) {
   int start = 0, end = 0, pulse_index;
   unsigned int i = 0;
   int plstypes[MAX_PULSE_TYPES];
@@ -447,4 +462,68 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes, int maxle
     return codelen;
   }
   return -1;
+}
+
+static protocols_t *find_proto(const char *name) {
+  struct protocols_t *pnode = protocols;
+  while (pnode != nullptr) {
+    if (strcmp(name, pnode->listener->id) == 0) {
+      return pnode;
+    }
+    pnode = pnode->next;
+  }
+  return nullptr;
+}
+
+void ESPiLight::limitProtocols(const String &protos) {
+  if (!json_validate(protos.c_str())) {
+    DebugLn("Protocol limit array is not a valid json message!");
+    return;
+  }
+  JsonNode *message = json_decode(protos.c_str());
+
+  if (message->tag != JSON_ARRAY) {
+    DebugLn("Protocol limit is not a json array!");
+    json_delete(message);
+    return;
+  }
+
+  struct protocols_t *pnode = used_protocols;
+  while (pnode != nullptr) {
+    struct protocols_t *tmp = pnode;
+    pnode = pnode->next;
+    free(tmp);
+  }
+
+  used_protocols = nullptr;
+  auto curr = message->children.head;
+
+  while (curr != nullptr) {
+    if (!curr->tag == JSON_STRING) {
+      DebugLn("Element is not a String");
+      continue;
+    }
+
+    auto *templ = find_proto(curr->string_);
+    if (templ == nullptr) {
+      Debug("Proto not found");
+      DebugLn(curr->string_)
+      continue;
+    }
+
+    auto *new_node = static_cast<protocols_t *>(malloc(sizeof(struct protocols_t)));
+    new_node->listener = templ->listener;
+    new_node->next = used_protocols;
+    used_protocols = new_node;
+
+    Debug("activated protocol ");
+    DebugLn(templ->listener->id);
+
+    if (curr == message->children.tail) {
+      break;
+    }
+    curr = curr->next;
+  }
+  json_delete(message);
+
 }
