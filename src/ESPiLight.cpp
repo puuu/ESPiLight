@@ -21,7 +21,7 @@
 extern "C" {
 #include "pilight/libs/pilight/protocols/protocol.h"
 }
-struct protocols_t *protocols = NULL;
+struct protocols_t *protocols = nullptr;
 
 volatile PulseTrain_t ESPiLight::_pulseTrains[RECEIVER_BUFFER_SIZE];
 boolean ESPiLight::_enabledReceiver;
@@ -144,15 +144,15 @@ void ESPiLight::loop() {
 
 ESPiLight::ESPiLight(int8_t outputPin) {
   _outputPin = outputPin;
-  _callback = NULL;
-  _rawCallback = NULL;
+  _callback = nullptr;
+  _rawCallback = nullptr;
 
   if (_outputPin >= 0) {
     pinMode(_outputPin, OUTPUT);
     digitalWrite(_outputPin, LOW);
   }
 
-  if (protocols == NULL) protocol_init();
+  if (protocols == nullptr) protocol_init();
 }
 
 void ESPiLight::setCallback(ESPiLightCallBack callback) {
@@ -208,7 +208,7 @@ int ESPiLight::send(const String &protocol, const String &json, int repeats) {
 
 int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
                                 const String &content) {
-  struct protocol_t *protocol = NULL;
+  struct protocol_t *protocol = nullptr;
   struct protocols_t *pnode = protocols;
   int return_value = EXIT_FAILURE;
   JsonNode *message;
@@ -221,10 +221,10 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
     return -2;
   }
 
-  while (pnode != NULL) {
+  while (pnode != nullptr) {
     protocol = pnode->listener;
 
-    if ((protocol->createCode != NULL) && (protocol_id == protocol->id) &&
+    if ((protocol->createCode != nullptr) && (protocol_id == protocol->id) &&
         (protocol->maxrawlen <= MAXPULSESTREAMLENGTH)) {
       Serial.print("protocol: ");
       Serial.print(protocol->id);
@@ -236,7 +236,7 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
       json_delete(message);
       // delete message created by createCode()
       json_delete(protocol->message);
-      protocol->message = NULL;
+      protocol->message = nullptr;
 
       if (return_value == EXIT_SUCCESS) {
         Serial.println(" create Code succeded.");
@@ -253,14 +253,14 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
 
 int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
   int matches = 0;
-  struct protocol_t *protocol = NULL;
+  struct protocol_t *protocol = nullptr;
   struct protocols_t *pnode = protocols;
 
   // Serial.println("piLightParsePulseTrain start");
-  while ((pnode != NULL) && (_callback != NULL)) {
+  while ((pnode != nullptr) && (_callback != nullptr)) {
     protocol = pnode->listener;
 
-    if (protocol->parseCode != NULL && protocol->validate != NULL) {
+    if (protocol->parseCode != nullptr && protocol->validate != nullptr) {
       protocol->raw = pulses;
       protocol->rawlen = length;
 
@@ -283,22 +283,22 @@ int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
           protocol->repeats = 0;
         }
 
-        protocol->message = NULL;
+        protocol->message = nullptr;
         protocol->parseCode();
-        if (protocol->message != NULL) {
+        if (protocol->message != nullptr) {
           matches++;
           protocol->repeats++;
 
           fire_callback(protocol, _callback);
 
           json_delete(protocol->message);
-          protocol->message = NULL;
+          protocol->message = nullptr;
         }
       }
     }
     pnode = pnode->next;
   }
-  if (_rawCallback != NULL) {
+  if (_rawCallback != nullptr) {
     (_rawCallback)(pulses, length);
   }
 
@@ -314,7 +314,7 @@ static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback) {
   double itmp;
   char *stmp;
 
-  if ((protocol->repeats <= 1) || (protocol->old_content == NULL)) {
+  if ((protocol->repeats <= 1) || (protocol->old_content == nullptr)) {
     status = FIRST;
     json_free(protocol->old_content);
     protocol->old_content = content;
