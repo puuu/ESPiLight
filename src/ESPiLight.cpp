@@ -271,8 +271,8 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
   return 0;
 }
 
-int ESPiLight::parsePulseTrain(uint16_t *pulses, uint8_t length) {
-  int matches = 0;
+size_t ESPiLight::parsePulseTrain(uint16_t *pulses, uint8_t length) {
+  size_t matches = 0;
   protocol_t *protocol = nullptr;
   protocols_t *pnode = used_protocols;
 

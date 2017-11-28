@@ -61,7 +61,7 @@ class ESPiLight {
   /**
    * Parse pulse train and fire callback
    */
-  int parsePulseTrain(uint16_t *pulses, uint8_t length);
+  size_t parsePulseTrain(uint16_t *pulses, uint8_t length);
 
   /**
    * Process receiver queue and fire callback
