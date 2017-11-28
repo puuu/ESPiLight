@@ -141,9 +141,9 @@ class ESPiLight {
   /**
    * Internal functions
    */
-  static boolean _enabledReceiver;  // If true, monitoring and decoding is
-                                    // enabled. If false, interruptHandler will
-                                    // return immediately.
+  static bool _enabledReceiver;  // If true, monitoring and decoding is
+                                 // enabled. If false, interruptHandler will
+                                 // return immediately.
   static volatile PulseTrain_t _pulseTrains[];
   static volatile int _actualPulseTrain;
   static int _avaiablePulseTrain;

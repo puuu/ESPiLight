@@ -33,7 +33,7 @@ struct protocols_t *protocols = nullptr;
 struct protocols_t *used_protocols = nullptr;
 
 volatile PulseTrain_t ESPiLight::_pulseTrains[RECEIVER_BUFFER_SIZE];
-boolean ESPiLight::_enabledReceiver;
+bool ESPiLight::_enabledReceiver;
 volatile int ESPiLight::_actualPulseTrain = 0;
 int ESPiLight::_avaiablePulseTrain = 0;
 volatile unsigned long ESPiLight::_lastChange =
@@ -177,7 +177,7 @@ void ESPiLight::setPulseTrainCallBack(PulseTrainCallBack rawCallback) {
 
 void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length,
                                int repeats) {
-  // boolean receiverState = _enabledReceiver;
+  // bool receiverState = _enabledReceiver;
   int r = 0, x = 0;
   if (_outputPin >= 0) {
     // disableReceiver()
