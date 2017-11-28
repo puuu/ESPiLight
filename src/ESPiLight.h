@@ -120,7 +120,7 @@ class ESPiLight {
 
   static String pulseTrainToString(const uint16_t *pulses, unsigned int length);
   static int stringToPulseTrain(const String &data, uint16_t *pulses,
-                                int maxlength);
+                                unsigned int maxlength);
 
   static int createPulseTrain(uint16_t *pulses, const String &protocol_id,
                               const String &json);
