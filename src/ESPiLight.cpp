@@ -59,7 +59,7 @@ void ESPiLight::initReceiver(byte inputPin) {
   enableReceiver();
 
   if (interrupt >= 0) {
-    attachInterrupt(interrupt, interruptHandler, CHANGE);
+    attachInterrupt((uint8_t)interrupt, interruptHandler, CHANGE);
   }
 }
 
