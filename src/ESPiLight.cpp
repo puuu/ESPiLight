@@ -19,7 +19,7 @@
 #include <ESPiLight.h>
 
 extern "C" {
-  #include "pilight/libs/pilight/protocols/protocol.h"
+#include "pilight/libs/pilight/protocols/protocol.h"
 }
 struct protocols_t *protocols = NULL;
 
@@ -52,10 +52,10 @@ int ESPiLight::receivePulseTrain(uint16_t *pulses) {
   int i = 0;
   int length = nextPulseTrainLength();
 
-  if(length > 0) {
+  if (length > 0) {
     volatile PulseTrain_t &pulseTrain = _pulseTrains[_avaiablePulseTrain];
-    _avaiablePulseTrain = (_avaiablePulseTrain + 1)%RECEIVER_BUFFER_SIZE;
-    for(i=0;i<length;i++) {
+    _avaiablePulseTrain = (_avaiablePulseTrain + 1) % RECEIVER_BUFFER_SIZE;
+    for (i = 0; i < length; i++) {
       pulses[i] = pulseTrain.pulses[i];
     }
     pulseTrain.length = 0;
@@ -78,31 +78,30 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
   volatile PulseTrain_t &pulseTrain = _pulseTrains[_actualPulseTrain];
   volatile uint16_t *codes = pulseTrain.pulses;
 
-  if(pulseTrain.length == 0) {
+  if (pulseTrain.length == 0) {
     duration = now - _lastChange;
     /* We first do some filtering (same as pilight BPF) */
-    if(duration > MIN_PULSELENGTH) {
-      if(duration < MAX_PULSELENGTH) {
-	/* All codes are buffered */
-	codes[_nrpulses] = duration;
-	_nrpulses = (_nrpulses+1)%MAXPULSESTREAMLENGTH;
-	/* Let's match footers */
-	if(duration > mingaplen) {
-	  //Serial.print('g');
-	  /* Only match minimal length pulse streams */
-	  if(_nrpulses >= minrawlen && _nrpulses <= maxrawlen) {
-	    //Serial.print(_nrpulses);
-	    //Serial.print('l');
-	    pulseTrain.length = _nrpulses;
-	    _actualPulseTrain = (_actualPulseTrain + 1)%RECEIVER_BUFFER_SIZE;
-	  }
-	  _nrpulses = 0;
-	}
+    if (duration > MIN_PULSELENGTH) {
+      if (duration < MAX_PULSELENGTH) {
+        /* All codes are buffered */
+        codes[_nrpulses] = duration;
+        _nrpulses = (_nrpulses + 1) % MAXPULSESTREAMLENGTH;
+        /* Let's match footers */
+        if (duration > mingaplen) {
+          //Serial.print('g');
+          /* Only match minimal length pulse streams */
+          if (_nrpulses >= minrawlen && _nrpulses <= maxrawlen) {
+            //Serial.print(_nrpulses);
+            //Serial.print('l');
+            pulseTrain.length = _nrpulses;
+            _actualPulseTrain = (_actualPulseTrain + 1) % RECEIVER_BUFFER_SIZE;
+          }
+          _nrpulses = 0;
+        }
       }
       _lastChange = now;
     }
-  }
-  else {
+  } else {
     Serial.print("_!_");
   }
   return;
@@ -110,7 +109,7 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
 
 void ESPiLight::resetReceiver() {
   int i = 0;
-  for(i=0;i<RECEIVER_BUFFER_SIZE;i++) {
+  for (i = 0; i < RECEIVER_BUFFER_SIZE; i++) {
     _pulseTrains[i].length = 0;
   }
   _actualPulseTrain = 0;
@@ -131,7 +130,7 @@ void ESPiLight::loop() {
 
   length = receivePulseTrain(pulses);
 
-  if(length > 0) {
+  if (length > 0) {
     /*
     Serial.print("RAW (");
     Serial.print(length);
@@ -151,7 +150,7 @@ ESPiLight::ESPiLight(int8_t outputPin) {
   _callback = NULL;
   _rawCallback = NULL;
 
-  if(_outputPin >= 0) {
+  if (_outputPin >= 0) {
     pinMode(_outputPin, OUTPUT);
     digitalWrite(_outputPin, LOW);
   }
@@ -170,16 +169,16 @@ void ESPiLight::setPulseTrainCallBack(PulseTrainCallBack rawCallback) {
 void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length, int repeats) {
   //boolean receiverState = _enabledReceiver;
   int r = 0, x = 0;
-  if(_outputPin >= 0) {
+  if (_outputPin >= 0) {
     //disableReceiver()
-    for(r=0;r<repeats;r++) {
-      for(x=0;x<length;x+=2) {
-	digitalWrite(_outputPin, HIGH);
-	delayMicroseconds(pulses[x]);
-	digitalWrite(_outputPin, LOW);
-	if(x+1 < length) {
-	  delayMicroseconds(pulses[x+1]);
-	}
+    for (r = 0; r < repeats; r++) {
+      for (x = 0; x < length; x += 2) {
+        digitalWrite(_outputPin, HIGH);
+        delayMicroseconds(pulses[x]);
+        digitalWrite(_outputPin, LOW);
+        if (x + 1 < length) {
+          delayMicroseconds(pulses[x + 1]);
+        }
       }
     }
     digitalWrite(_outputPin, LOW);
@@ -193,7 +192,7 @@ int ESPiLight::send(const String &protocol, const String &json, int repeats) {
   uint16_t pulses[MAXPULSESTREAMLENGTH];
 
   length = createPulseTrain(pulses, protocol, json);
-  if(length > 0) {
+  if (length > 0) {
     /*
     Serial.println();
     Serial.print("send: ");
@@ -210,7 +209,7 @@ int ESPiLight::send(const String &protocol, const String &json, int repeats) {
 }
 
 int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
-				const String &content) {
+                                const String &content) {
   struct protocol_t *protocol = NULL;
   struct protocols_t *pnode = protocols;
   int return_value = EXIT_FAILURE;
@@ -218,18 +217,18 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
 
   Serial.print("piLightCreatePulseTrain: ");
 
-  if(json_validate(content.c_str()) != true) {
+  if (json_validate(content.c_str()) != true) {
     Serial.print("invalid json: ");
     Serial.println(content);
     return -2;
   }
 
-  while(pnode != NULL) {
+  while (pnode != NULL) {
     protocol = pnode->listener;
 
-    if((protocol->createCode != NULL)
-       && (protocol_id == protocol->id)
-       && (protocol->maxrawlen <= MAXPULSESTREAMLENGTH)) {
+    if ((protocol->createCode != NULL)
+        && (protocol_id == protocol->id)
+        && (protocol->maxrawlen <= MAXPULSESTREAMLENGTH)) {
 
       Serial.print("protocol: ");
       Serial.print(protocol->id);
@@ -244,12 +243,11 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
       protocol->message = NULL;
 
       if (return_value == EXIT_SUCCESS) {
-	Serial.println(" create Code succeded.");
-	return protocol->rawlen;
-      }
-      else {
-	Serial.println(" create Code failed.");
-	return -1;
+        Serial.println(" create Code succeded.");
+        return protocol->rawlen;
+      } else {
+        Serial.println(" create Code failed.");
+        return -1;
       }
     }
     pnode = pnode->next;
@@ -263,45 +261,45 @@ int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
   struct protocols_t *pnode = protocols;
 
   //Serial.println("piLightParsePulseTrain start");
-  while((pnode != NULL) && (_callback != NULL) ) {
+  while ((pnode != NULL) && (_callback != NULL)) {
     protocol = pnode->listener;
 
-    if(protocol->parseCode != NULL && protocol->validate != NULL) {
+    if (protocol->parseCode != NULL && protocol->validate != NULL) {
 
       protocol->raw = pulses;
       protocol->rawlen = length;
 
-      if(protocol->validate() == 0) {
+      if (protocol->validate() == 0) {
 
-	Serial.print("pulses: ");
-	Serial.print(length);
-	Serial.print(" possible protocol: ");
-	Serial.println(protocol->id);
+        Serial.print("pulses: ");
+        Serial.print(length);
+        Serial.print(" possible protocol: ");
+        Serial.println(protocol->id);
 
-	if(protocol->first > 0) {
-	  protocol->first = protocol->second;
-	}
-	protocol->second = micros();
-	if(protocol->first == 0) {
-	  protocol->first = protocol->second;
-	}
+        if (protocol->first > 0) {
+          protocol->first = protocol->second;
+        }
+        protocol->second = micros();
+        if (protocol->first == 0) {
+          protocol->first = protocol->second;
+        }
 
-	/* Reset # of repeats after a certain delay */
-	if(((int)protocol->second-(int)protocol->first) > 500000) {
-	  protocol->repeats = 0;
-	}
+        /* Reset # of repeats after a certain delay */
+        if (((int) protocol->second - (int) protocol->first) > 500000) {
+          protocol->repeats = 0;
+        }
 
-	protocol->message = NULL;
-	protocol->parseCode();
-	if (protocol->message != NULL) {
-	  matches++;
-	  protocol->repeats++;
+        protocol->message = NULL;
+        protocol->parseCode();
+        if (protocol->message != NULL) {
+          matches++;
+          protocol->repeats++;
 
-	  fire_callback(protocol, _callback);
+          fire_callback(protocol, _callback);
 
-	  json_delete(protocol->message);
-	  protocol->message = NULL;
-	}
+          json_delete(protocol->message);
+          protocol->message = NULL;
+        }
       }
     }
     pnode = pnode->next;
@@ -322,39 +320,34 @@ static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback) {
   double itmp;
   char *stmp;
 
-  if((protocol->repeats <= 1) || (protocol->old_content == NULL)) {
+  if ((protocol->repeats <= 1) || (protocol->old_content == NULL)) {
     status = FIRST;
     json_free(protocol->old_content);
     protocol->old_content = content;
-  }
-  else if(protocol->repeats < 100) {
-    if(strcmp(content, protocol->old_content) == 0) {
+  } else if (protocol->repeats < 100) {
+    if (strcmp(content, protocol->old_content) == 0) {
       protocol->repeats += 100;
       status = VALID;
-    }
-    else {
+    } else {
       status = INVALID;
     }
     json_free(protocol->old_content);
     protocol->old_content = content;
-  }
-  else {
+  } else {
     status = KNOWN;
     json_free(content);
   }
-  if(json_find_number(protocol->message, "id", &itmp) == 0) {
-    deviceId = String((int)round(itmp));
-  }
-  else if (json_find_string(protocol->message, "id", &stmp) == 0) {
+  if (json_find_number(protocol->message, "id", &itmp) == 0) {
+    deviceId = String((int) round(itmp));
+  } else if (json_find_string(protocol->message, "id", &stmp) == 0) {
     deviceId = String(stmp);
   };
   (callback)(String(protocol->id), String(protocol->old_content), status, protocol->repeats, deviceId);
 }
 
-
 String ESPiLight::pulseTrainToString(const uint16_t *codes, int length) {
   int i = 0, x = 0, match = 0;
-  int diff=0;
+  int diff = 0;
   int plstypes[MAX_PULSE_TYPES];
   String data("");
 
@@ -362,39 +355,39 @@ String ESPiLight::pulseTrainToString(const uint16_t *codes, int length) {
     return String("");
   }
 
-  for(x=0;x<MAX_PULSE_TYPES;x++) {
+  for (x = 0; x < MAX_PULSE_TYPES; x++) {
     plstypes[x] = 0;
   }
 
-  data.reserve(6+length);
+  data.reserve(6 + length);
   //Serial.print("pulseTrainToString: ");
   int p = 0;
   data += "c:";
-  for(i=0;i<length;i++) {
+  for (i = 0; i < length; i++) {
     match = 0;
-    for(x=0;x<MAX_PULSE_TYPES;x++) {
+    for (x = 0; x < MAX_PULSE_TYPES; x++) {
       /* We device these numbers by 10 to normalize them a bit */
-      diff = (plstypes[x]/50)-(codes[i]/50);
-      if((diff >= -2) && (diff <= 2)) {
-	/* Write numbers */
-	data += (char)('0'+((char)x));
-	match = 1;
-	break;
+      diff = (plstypes[x] / 50) - (codes[i] / 50);
+      if ((diff >= -2) && (diff <= 2)) {
+        /* Write numbers */
+        data += (char) ('0' + ((char) x));
+        match = 1;
+        break;
       }
     }
-    if(match == 0) {
+    if (match == 0) {
       plstypes[p++] = codes[i];
-      data += (char)('0'+((char)(p-1)));
-      if(p>=MAX_PULSE_TYPES) {
-	Serial.println("too many pulse types");
-	return String("");
+      data += (char) ('0' + ((char) (p - 1)));
+      if (p >= MAX_PULSE_TYPES) {
+        Serial.println("too many pulse types");
+        return String("");
       }
     }
   }
   data += ";p:";
-  for(i=0;i<p;i++) {
+  for (i = 0; i < p; i++) {
     data += plstypes[i];
-    if(i+1 < p) {
+    if (i + 1 < p) {
       data += ',';
     }
   }
@@ -407,38 +400,38 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes, int maxle
   unsigned int i = 0;
   int plstypes[MAX_PULSE_TYPES];
 
-  for(i=0;i<MAX_PULSE_TYPES;i++) {
+  for (i = 0; i < MAX_PULSE_TYPES; i++) {
     plstypes[i] = 0;
   }
 
-  int scode = data.indexOf('c')+2;
-  int spulse = data.indexOf('p')+2;
-  if(scode > 0 && (unsigned) scode < data.length() &&
-     spulse > 0 && (unsigned) spulse < data.length()) {
+  int scode = data.indexOf('c') + 2;
+  int spulse = data.indexOf('p') + 2;
+  if (scode > 0 && (unsigned) scode < data.length() &&
+      spulse > 0 && (unsigned) spulse < data.length()) {
     int nrpulses = 0;
     start = spulse;
     end = data.indexOf(',', start);
-    while(end > 0) {
+    while (end > 0) {
       plstypes[nrpulses++] = data.substring(start, end).toInt();
-      start = end+1;
+      start = end + 1;
       end = data.indexOf(',', start);
     }
     end = data.indexOf(';', start);
-    if(end<0)
+    if (end < 0)
       end = data.indexOf('@', start);
-    if(end<0)
+    if (end < 0)
       return -2;
     plstypes[nrpulses++] = data.substring(start, end).toInt();
 
     int codelen = 0;
-    for(i = scode; i < data.length(); i++) {
-      if((data[i] == ';') || (data[i] == '@'))
-	break;
-      if(i >= (unsigned) maxlength)
-	break;
+    for (i = scode; i < data.length(); i++) {
+      if ((data[i] == ';') || (data[i] == '@'))
+        break;
+      if (i >= (unsigned) maxlength)
+        break;
       pulse_index = data[i] - '0';
-      if((pulse_index < 0) || (pulse_index >= nrpulses))
-	return -3;
+      if ((pulse_index < 0) || (pulse_index >= nrpulses))
+        return -3;
       codes[codelen++] = plstypes[pulse_index];
     }
     return codelen;
