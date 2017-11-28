@@ -99,8 +99,8 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
     if (duration > MIN_PULSELENGTH) {
       if (duration < MAX_PULSELENGTH) {
         /* All codes are buffered */
-        codes[_nrpulses] = duration;
-        _nrpulses = (_nrpulses + 1) % MAXPULSESTREAMLENGTH;
+        codes[_nrpulses] = (uint16_t)duration;
+        _nrpulses = (uint8_t)((_nrpulses + 1) % MAXPULSESTREAMLENGTH);
         /* Let's match footers */
         if (duration > mingaplen) {
           // Debug('g');
@@ -385,14 +385,14 @@ String ESPiLight::pulseTrainToString(const uint16_t *codes, size_t length) {
       diff = (plstypes[x] / 50) - (codes[i] / 50);
       if ((diff >= -2) && (diff <= 2)) {
         /* Write numbers */
-        data += (char)('0' + ((char)x));
+        data += '0' + ((char)x);
         match = 1;
         break;
       }
     }
     if (match == 0) {
       plstypes[p++] = codes[i];
-      data += (char)('0' + ((char)(p - 1)));
+      data += '0' + ((char)(p - 1));
       if (p >= MAX_PULSE_TYPES) {
         DebugLn("too many pulse types");
         return String("");
