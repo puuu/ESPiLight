@@ -30,6 +30,7 @@ extern "C" {
 #include "pilight/libs/pilight/protocols/protocol.h"
 }
 struct protocols_t *protocols = nullptr;
+struct protocols_t *used_protocols = nullptr;
 
 volatile PulseTrain_t ESPiLight::_pulseTrains[RECEIVER_BUFFER_SIZE];
 boolean ESPiLight::_enabledReceiver;
@@ -159,7 +160,11 @@ ESPiLight::ESPiLight(int8_t outputPin) {
     digitalWrite(static_cast<uint8_t>(_outputPin), LOW);
   }
 
-  if (protocols == nullptr) protocol_init();
+  if (protocols == nullptr) {
+    protocol_init();
+
+    used_protocols = protocols;
+  }
 }
 
 void ESPiLight::setCallback(ESPiLightCallBack callback) {
@@ -219,7 +224,7 @@ int ESPiLight::send(const String &protocol, const String &json, int repeats) {
 int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
                                 const String &content) {
   struct protocol_t *protocol = nullptr;
-  struct protocols_t *pnode = protocols;
+  struct protocols_t *pnode = used_protocols;
   int return_value = EXIT_FAILURE;
   JsonNode *message;
 
@@ -264,7 +269,7 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
 int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
   int matches = 0;
   struct protocol_t *protocol = nullptr;
-  struct protocols_t *pnode = protocols;
+  struct protocols_t *pnode = used_protocols;
 
   // DebugLn("piLightParsePulseTrain start");
   while ((pnode != nullptr) && (_callback != nullptr)) {
@@ -442,4 +447,77 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
     return codelen;
   }
   return -1;
+}
+
+static protocols_t *find_proto(const char *name) {
+  struct protocols_t *pnode = protocols;
+  while (pnode != nullptr) {
+    if (strcmp(name, pnode->listener->id) == 0) {
+      return pnode;
+    }
+    pnode = pnode->next;
+  }
+  return nullptr;
+}
+
+void ESPiLight::limitProtocols(const String &protos) {
+  if (!json_validate(protos.c_str())) {
+    DebugLn("Protocol limit argument is not a valid json message!");
+    return;
+  }
+  JsonNode *message = json_decode(protos.c_str());
+
+  if (message->tag != JSON_ARRAY) {
+    DebugLn("Protocol limit argument is not a json array!");
+    json_delete(message);
+    return;
+  }
+
+  if (used_protocols != protocols) {
+    struct protocols_t *pnode = used_protocols;
+    while (pnode != nullptr) {
+      struct protocols_t *tmp = pnode;
+      pnode = pnode->next;
+      delete tmp;
+    }
+  }
+
+  used_protocols = nullptr;
+  JsonNode *curr = message->children.head;
+  unsigned int proto_count = 0;
+
+  while (curr != nullptr) {
+    if (!curr->tag == JSON_STRING) {
+      DebugLn("Element is not a String");
+      continue;
+    }
+
+    protocols_t *templ = find_proto(curr->string_);
+    if (templ == nullptr) {
+      Debug("Protocol not found: ");
+      DebugLn(curr->string_);
+      continue;
+    }
+
+    protocols_t *new_node = new protocols_t;
+    new_node->listener = templ->listener;
+    new_node->next = used_protocols;
+    used_protocols = new_node;
+
+    Debug("activated protocol ");
+    DebugLn(templ->listener->id);
+    proto_count++;
+
+    if (curr == message->children.tail) {
+      break;
+    }
+    curr = curr->next;
+  }
+
+  // Reset if we have an empty array.
+  if (proto_count == 0) {
+    used_protocols = protocols;
+  }
+
+  json_delete(message);
 }
