@@ -370,7 +370,8 @@ static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback) {
              protocol->repeats, deviceId);
 }
 
-String ESPiLight::pulseTrainToString(const uint16_t *codes, int length) {
+String ESPiLight::pulseTrainToString(const uint16_t *codes,
+                                     unsigned int length) {
   int i = 0, x = 0, match = 0;
   int diff = 0;
   int plstypes[MAX_PULSE_TYPES];

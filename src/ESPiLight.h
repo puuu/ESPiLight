@@ -118,7 +118,7 @@ class ESPiLight {
   static uint16_t mingaplen;
   static uint16_t maxgaplen;
 
-  static String pulseTrainToString(const uint16_t *pulses, int length);
+  static String pulseTrainToString(const uint16_t *pulses, unsigned int length);
   static int stringToPulseTrain(const String &data, uint16_t *pulses,
                                 int maxlength);
 
