@@ -114,10 +114,10 @@ class ESPiLight {
    */
   static void limitProtocols(const String &protos);
 
-  static unsigned int minrawlen;
-  static unsigned int maxrawlen;
-  static unsigned int mingaplen;
-  static unsigned int maxgaplen;
+  static uint8_t minrawlen;
+  static uint8_t maxrawlen;
+  static uint16_t mingaplen;
+  static uint16_t maxgaplen;
 
   static String pulseTrainToString(const uint16_t *pulses, int length);
   static int stringToPulseTrain(const String &data, uint16_t *pulses,
