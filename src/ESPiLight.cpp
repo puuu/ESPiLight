@@ -241,7 +241,7 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
 
   Debug("piLightCreatePulseTrain: ");
 
-  if (json_validate(content.c_str()) != true) {
+  if (!json_validate(content.c_str())) {
     Debug("invalid json: ");
     DebugLn(content);
     return -2;
