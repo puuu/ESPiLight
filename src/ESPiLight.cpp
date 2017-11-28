@@ -155,8 +155,8 @@ ESPiLight::ESPiLight(int8_t outputPin) {
   _rawCallback = nullptr;
 
   if (_outputPin >= 0) {
-    pinMode(_outputPin, OUTPUT);
-    digitalWrite(_outputPin, LOW);
+    pinMode(static_cast<uint8_t>(_outputPin), OUTPUT);
+    digitalWrite(static_cast<uint8_t>(_outputPin), LOW);
   }
 
   if (protocols == nullptr) protocol_init();
@@ -178,15 +178,15 @@ void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length,
     // disableReceiver()
     for (r = 0; r < repeats; r++) {
       for (x = 0; x < length; x += 2) {
-        digitalWrite(_outputPin, HIGH);
+        digitalWrite(static_cast<uint8_t>(_outputPin), HIGH);
         delayMicroseconds(pulses[x]);
-        digitalWrite(_outputPin, LOW);
+        digitalWrite(static_cast<uint8_t>(_outputPin), LOW);
         if (x + 1 < length) {
           delayMicroseconds(pulses[x + 1]);
         }
       }
     }
-    digitalWrite(_outputPin, LOW);
+    digitalWrite(static_cast<uint8_t>(_outputPin), LOW);
     // if (receiverState) enableReceiver();
   }
 }
