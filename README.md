@@ -49,6 +49,13 @@ branch. The `release` is used to integrate the pilight files and for
 version tagging, like necessary for the Arduino Library Manager
 crawler.
 
+To prevent formating issues, please make sure that your code is proper
+formatted. We use the `clang-format` tool with the `Google` style.
+You can just format the code by calling
+```
+$ clang-format -style=Google -i <source-file>
+```
+
 
 ### Install from source
 
