@@ -12,7 +12,7 @@
 ESPiLight rf(-1);  //use -1 to disable transmitter
 
 // callback function. It is called on successfully received and parsed rc signal
-void rfRawCallback(const uint16_t* codes, int length) {
+void rfRawCallback(const uint16_t* codes, uint8_t length) {
   // print pulse lengths
   printPulseTran(codes, length);
   
@@ -36,7 +36,7 @@ void rfCallback(const String &protocol, const String &message, int status, int r
   Serial.println();
 }
 
-void printPulseTran(const uint16_t *codes, int length) {
+void printPulseTran(const uint16_t *codes, uint8_t length) {
   Serial.print("RAW signal: ");
   for(int i=0; i < length; i++) {
     Serial.print(codes[i]);
@@ -52,7 +52,7 @@ void setup() {
   //set callback funktion for raw messages
   rf.setPulseTrainCallBack(rfRawCallback);
 
-  int length = 0;
+  uint8_t length = 0;
   uint16_t pulses[MAXPULSESTREAMLENGTH];
 
   // pulse train from ppilight json message

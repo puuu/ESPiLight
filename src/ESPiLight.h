@@ -37,14 +37,14 @@ typedef struct PulseTrain_t {
 } PulseTrain_t;
 
 typedef void (*ESPiLightCallBack)(const String &protocol, const String &message, int status, int repeats, const String &deviceID);
-typedef void (*PulseTrainCallBack)(const uint16_t* pulses, int length);
+typedef void (*PulseTrainCallBack)(const uint16_t* pulses, uint8_t length);
 
 class ESPiLight {
  public:
   /**
    * Constructor.
    */
-  ESPiLight(int8_t outputPin);
+  explicit ESPiLight(uint8_t outputPin);
 
   /**
    * Transmit pulse train
@@ -59,7 +59,7 @@ class ESPiLight {
   /**
    * Parse pulse train and fire callback
    */
-  int parsePulseTrain(uint16_t *pulses, int length);
+  int parsePulseTrain(uint16_t *pulses, uint8_t length);
 
   /**
    * Process receiver queue and fire callback
@@ -78,13 +78,13 @@ class ESPiLight {
    * Get last received PulseTrain.
    * Returns: length of PulseTrain or 0 if not avaiable
    */
-  static int receivePulseTrain(uint16_t *pulses);
+  static uint8_t receivePulseTrain(uint16_t *pulses);
 
   /**
    * Check if new PulseTrain avaiable.
    * Returns: 0 if no new PulseTrain avaiable
    */
-  static int nextPulseTrainLength();
+  static uint8_t nextPulseTrainLength();
 
   /**
    * Enable Receiver. No need to call enableReceiver() after initReceiver().
@@ -102,20 +102,27 @@ class ESPiLight {
    */
   static void interruptHandler();
 
-  static unsigned int minrawlen;
-  static unsigned int maxrawlen;
-  static unsigned int mingaplen;
-  static unsigned int maxgaplen;
+  /**
+   * Limit the available protocols.
+   *
+   * This gets a json array of the protocol names that should be activated.
+   */
+  static void limitProtocols(const String& protos);
 
-  static String pulseTrainToString(const uint16_t *pulses, int length);
-  static int stringToPulseTrain(const String &data, uint16_t *pulses, int maxlength);
+  static uint8_t minrawlen;
+  static uint8_t maxrawlen;
+  static uint16_t mingaplen;
+  static uint16_t maxgaplen;
+
+  static String pulseTrainToString(const uint16_t *pulses, unsigned length);
+  static int stringToPulseTrain(const String &data, uint16_t *pulses, unsigned int maxlength);
 
   static int createPulseTrain(uint16_t *pulses, const String &protocol_id, const String &json);
 
  private:
   ESPiLightCallBack _callback;
   PulseTrainCallBack _rawCallback;
-  int8_t _outputPin;
+  uint8_t _outputPin;
 
   /**
    * Quasi-reset. Called when the current edge is too long or short.
@@ -126,7 +133,7 @@ class ESPiLight {
   /**
    * Internal functions
    */
-  static boolean _enabledReceiver; // If true, monitoring and decoding is enabled. If false, interruptHandler will return immediately.
+  static bool _enabledReceiver; // If true, monitoring and decoding is enabled. If false, interruptHandler will return immediately.
   static volatile PulseTrain_t _pulseTrains[];
   static volatile int _actualPulseTrain;
   static int _avaiablePulseTrain;
