@@ -113,7 +113,6 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
   } else {
     Debug("_!_");
   }
-  return;
 }
 
 void ESPiLight::resetReceiver() {
@@ -190,7 +189,6 @@ void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length,
     digitalWrite(_outputPin, LOW);
     // if (receiverState) enableReceiver();
   }
-  return;
 }
 
 int ESPiLight::send(const String &protocol, const String &json, int repeats) {
