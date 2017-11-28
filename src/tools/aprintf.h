@@ -24,11 +24,11 @@
 #define fprintf(stream, args...) printf(args)
 
 #ifdef __cplusplus
-  extern "C" {
+extern "C" {
 #endif
 void exit(int n);
 #ifdef __cplusplus
-  }
+}
 #endif
 
-#endif //_APRINTF_H_
+#endif  //_APRINTF_H_
