@@ -99,8 +99,8 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
     if (duration > MIN_PULSELENGTH) {
       if (duration < MAX_PULSELENGTH) {
         /* All codes are buffered */
-        codes[_nrpulses] = duration;
-        _nrpulses = (_nrpulses + 1) % MAXPULSESTREAMLENGTH;
+        codes[_nrpulses] = (uint16_t)duration;
+        _nrpulses = (uint8_t)((_nrpulses + 1) % MAXPULSESTREAMLENGTH);
         /* Let's match footers */
         if (duration > mingaplen) {
           // Debug('g');
