@@ -45,10 +45,10 @@ volatile unsigned long ESPiLight::_lastChange =
     0;  // Timestamp of previous edge
 volatile uint8_t ESPiLight::_nrpulses = 0;
 
-unsigned int ESPiLight::minrawlen = 5;
-unsigned int ESPiLight::maxrawlen = MAXPULSESTREAMLENGTH;
-unsigned int ESPiLight::mingaplen = 5100;
-unsigned int ESPiLight::maxgaplen = 10000;
+uint8_t ESPiLight::minrawlen = 5;
+uint8_t ESPiLight::maxrawlen = MAXPULSESTREAMLENGTH;
+uint16_t ESPiLight::mingaplen = 5100;
+uint16_t ESPiLight::maxgaplen = 10000;
 
 static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback);
 
