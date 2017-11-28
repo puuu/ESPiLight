@@ -18,6 +18,14 @@
 
 #include <ESPiLight.h>
 
+#ifdef DEBUG
+#define Debug(x) Serial.print(x)
+#define DebugLn(x) Serial.println(x)
+#else
+#define Debug(x)
+#define DebugLn(x)
+#endif
+
 extern "C" {
 #include "pilight/libs/pilight/protocols/protocol.h"
 }
@@ -90,11 +98,11 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
         _nrpulses = (_nrpulses + 1) % MAXPULSESTREAMLENGTH;
         /* Let's match footers */
         if (duration > mingaplen) {
-          // Serial.print('g');
+          // Debug('g');
           /* Only match minimal length pulse streams */
           if (_nrpulses >= minrawlen && _nrpulses <= maxrawlen) {
-            // Serial.print(_nrpulses);
-            // Serial.print('l');
+            // Debug(_nrpulses);
+            // Debug('l');
             pulseTrain.length = _nrpulses;
             _actualPulseTrain = (_actualPulseTrain + 1) % RECEIVER_BUFFER_SIZE;
           }
@@ -104,7 +112,7 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
       _lastChange = now;
     }
   } else {
-    Serial.print("_!_");
+    Debug("_!_");
   }
   return;
 }
@@ -130,14 +138,14 @@ void ESPiLight::loop() {
 
   if (length > 0) {
     /*
-    Serial.print("RAW (");
-    Serial.print(length);
-    Serial.print("): ");
+    Debug("RAW (");
+    Debug(length);
+    Debug("): ");
     for(int i=0;i<length;i++) {
-      Serial.print(pulses[i]);
-      Serial.print(' ');
+      Debug(pulses[i]);
+      Debug(' ');
     }
-    Serial.println();
+    DebugLn();
     */
     parsePulseTrain(pulses, length);
   }
@@ -163,7 +171,7 @@ ESPiLight::ESPiLight(int8_t outputPin) {
           static_cast<protocols_t *>(malloc(sizeof(struct protocols_t)));
 
       if (new_node == nullptr) {
-        Serial.println("out of memory");
+        DebugLn("out of memory");
         return;
       }
       new_node->listener = pnode->listener;
@@ -212,14 +220,14 @@ int ESPiLight::send(const String &protocol, const String &json, int repeats) {
   length = createPulseTrain(pulses, protocol, json);
   if (length > 0) {
     /*
-    Serial.println();
-    Serial.print("send: ");
-    Serial.print(length);
-    Serial.print(" pulses (");
-    Serial.print(protocol);
-    Serial.print(", ");
-    Serial.print(content);
-    Serial.println(")");
+    DebugLn();
+    Debug("send: ");
+    Debug(length);
+    Debug(" pulses (");
+    Debug(protocol);
+    Debug(", ");
+    Debug(content);
+    DebugLn(")");
     */
     sendPulseTrain(pulses, length, repeats);
   }
@@ -233,11 +241,11 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
   int return_value = EXIT_FAILURE;
   JsonNode *message;
 
-  Serial.print("piLightCreatePulseTrain: ");
+  Debug("piLightCreatePulseTrain: ");
 
   if (json_validate(content.c_str()) != true) {
-    Serial.print("invalid json: ");
-    Serial.println(content);
+    Debug("invalid json: ");
+    DebugLn(content);
     return -2;
   }
 
@@ -246,8 +254,8 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
 
     if ((protocol->createCode != nullptr) && (protocol_id == protocol->id) &&
         (protocol->maxrawlen <= MAXPULSESTREAMLENGTH)) {
-      Serial.print("protocol: ");
-      Serial.print(protocol->id);
+      Debug("protocol: ");
+      Debug(protocol->id);
 
       protocol->rawlen = 0;
       protocol->raw = pulses;
@@ -259,10 +267,10 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
       protocol->message = nullptr;
 
       if (return_value == EXIT_SUCCESS) {
-        Serial.println(" create Code succeded.");
+        DebugLn(" create Code succeded.");
         return protocol->rawlen;
       } else {
-        Serial.println(" create Code failed.");
+        DebugLn(" create Code failed.");
         return -1;
       }
     }
@@ -285,10 +293,10 @@ int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
       protocol->rawlen = length;
 
       if (protocol->validate() == 0) {
-        Serial.print("pulses: ");
-        Serial.print(length);
-        Serial.print(" possible protocol: ");
-        Serial.println(protocol->id);
+        Debug("pulses: ");
+        Debug(length);
+        Debug(" possible protocol: ");
+        DebugLn(protocol->id);
 
         if (protocol->first > 0) {
           protocol->first = protocol->second;
@@ -322,8 +330,8 @@ int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
     (_rawCallback)(pulses, length);
   }
 
-  // Serial.print("piLightParsePulseTrain end. matches: ");
-  // Serial.println(matches);
+  // Debug("piLightParsePulseTrain end. matches: ");
+  // DebugLn(matches);
   return matches;
 }
 
@@ -375,7 +383,7 @@ String ESPiLight::pulseTrainToString(const uint16_t *codes, int length) {
   }
 
   data.reserve(6 + length);
-  // Serial.print("pulseTrainToString: ");
+  // Debug("pulseTrainToString: ");
   int p = 0;
   data += "c:";
   for (i = 0; i < length; i++) {
@@ -394,7 +402,7 @@ String ESPiLight::pulseTrainToString(const uint16_t *codes, int length) {
       plstypes[p++] = codes[i];
       data += (char)('0' + ((char)(p - 1)));
       if (p >= MAX_PULSE_TYPES) {
-        Serial.println("too many pulse types");
+        DebugLn("too many pulse types");
         return String("");
       }
     }
@@ -463,13 +471,13 @@ static protocols_t *find_proto(const char *name) {
 
 void ESPiLight::limitProtocols(const String &protos) {
   if (!json_validate(protos.c_str())) {
-    Serial.println("Protocol limit argument is not a valid json message!");
+    DebugLn("Protocol limit argument is not a valid json message!");
     return;
   }
   JsonNode *message = json_decode(protos.c_str());
 
   if (message->tag != JSON_ARRAY) {
-    Serial.println("Protocol limit argument is not a json array!");
+    DebugLn("Protocol limit argument is not a json array!");
     json_delete(message);
     return;
   }
@@ -486,14 +494,14 @@ void ESPiLight::limitProtocols(const String &protos) {
 
   while (curr != nullptr) {
     if (!curr->tag == JSON_STRING) {
-      Serial.println("Element is not a String");
+      DebugLn("Element is not a String");
       continue;
     }
 
     auto *templ = find_proto(curr->string_);
     if (templ == nullptr) {
-      Serial.print("Protocol not found: ");
-      Serial.println(curr->string_);
+      Debug("Protocol not found: ");
+      DebugLn(curr->string_);
       continue;
     }
 
@@ -503,8 +511,8 @@ void ESPiLight::limitProtocols(const String &protos) {
     new_node->next = used_protocols;
     used_protocols = new_node;
 
-    Serial.print("activated protocol ");
-    Serial.println(templ->listener->id);
+    Debug("activated protocol ");
+    DebugLn(templ->listener->id);
 
     if (curr == message->children.tail) {
       break;
