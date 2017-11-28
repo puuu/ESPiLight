@@ -21,7 +21,8 @@
 extern "C" {
 #include "pilight/libs/pilight/protocols/protocol.h"
 }
-struct protocols_t *protocols = NULL;
+struct protocols_t *protocols = nullptr;
+struct protocols_t *used_protocols = nullptr;
 
 volatile PulseTrain_t ESPiLight::_pulseTrains[RECEIVER_BUFFER_SIZE];
 boolean ESPiLight::_enabledReceiver;
@@ -152,7 +153,26 @@ ESPiLight::ESPiLight(int8_t outputPin) {
     digitalWrite(_outputPin, LOW);
   }
 
-  if (protocols == NULL) protocol_init();
+  if (protocols == nullptr) {
+    protocol_init();
+
+    used_protocols = nullptr;
+    struct protocols_t *pnode = protocols;
+    while (pnode != nullptr) {
+      auto *new_node =
+          static_cast<protocols_t *>(malloc(sizeof(struct protocols_t)));
+
+      if (new_node == nullptr) {
+        Serial.println("out of memory");
+        return;
+      }
+      new_node->listener = pnode->listener;
+      new_node->next = used_protocols;
+      used_protocols = new_node;
+
+      pnode = pnode->next;
+    }
+  }
 }
 
 void ESPiLight::setCallback(ESPiLightCallBack callback) {
@@ -209,7 +229,7 @@ int ESPiLight::send(const String &protocol, const String &json, int repeats) {
 int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
                                 const String &content) {
   struct protocol_t *protocol = NULL;
-  struct protocols_t *pnode = protocols;
+  struct protocols_t *pnode = used_protocols;
   int return_value = EXIT_FAILURE;
   JsonNode *message;
 
@@ -254,7 +274,7 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
 int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
   int matches = 0;
   struct protocol_t *protocol = NULL;
-  struct protocols_t *pnode = protocols;
+  struct protocols_t *pnode = used_protocols;
 
   // Serial.println("piLightParsePulseTrain start");
   while ((pnode != NULL) && (_callback != NULL)) {
@@ -428,4 +448,68 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
     return codelen;
   }
   return -1;
+}
+
+static protocols_t *find_proto(const char *name) {
+  struct protocols_t *pnode = protocols;
+  while (pnode != nullptr) {
+    if (strcmp(name, pnode->listener->id) == 0) {
+      return pnode;
+    }
+    pnode = pnode->next;
+  }
+  return nullptr;
+}
+
+void ESPiLight::limitProtocols(const String &protos) {
+  if (!json_validate(protos.c_str())) {
+    Serial.println("Protocol limit argument is not a valid json message!");
+    return;
+  }
+  JsonNode *message = json_decode(protos.c_str());
+
+  if (message->tag != JSON_ARRAY) {
+    Serial.println("Protocol limit argument is not a json array!");
+    json_delete(message);
+    return;
+  }
+
+  struct protocols_t *pnode = used_protocols;
+  while (pnode != nullptr) {
+    struct protocols_t *tmp = pnode;
+    pnode = pnode->next;
+    free(tmp);
+  }
+
+  used_protocols = nullptr;
+  auto curr = message->children.head;
+
+  while (curr != nullptr) {
+    if (!curr->tag == JSON_STRING) {
+      Serial.println("Element is not a String");
+      continue;
+    }
+
+    auto *templ = find_proto(curr->string_);
+    if (templ == nullptr) {
+      Serial.print("Protocol not found: ");
+      Serial.println(curr->string_);
+      continue;
+    }
+
+    auto *new_node =
+        static_cast<protocols_t *>(malloc(sizeof(struct protocols_t)));
+    new_node->listener = templ->listener;
+    new_node->next = used_protocols;
+    used_protocols = new_node;
+
+    Serial.print("activated protocol ");
+    Serial.println(templ->listener->id);
+
+    if (curr == message->children.tail) {
+      break;
+    }
+    curr = curr->next;
+  }
+  json_delete(message);
 }

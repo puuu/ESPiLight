@@ -106,6 +106,13 @@ class ESPiLight {
    */
   static void interruptHandler();
 
+  /**
+   * Limit the available protocols.
+   *
+   * This gets a json array of the protocol names that should be activated.
+   */
+  static void limitProtocols(const String &protos);
+
   static unsigned int minrawlen;
   static unsigned int maxrawlen;
   static unsigned int mingaplen;
