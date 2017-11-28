@@ -39,7 +39,7 @@ typedef struct PulseTrain_t {
 typedef void (*ESPiLightCallBack)(const String &protocol, const String &message,
                                   int status, int repeats,
                                   const String &deviceID);
-typedef void (*PulseTrainCallBack)(const uint16_t *pulses, int length);
+typedef void (*PulseTrainCallBack)(const uint16_t *pulses, size_t length);
 
 class ESPiLight {
  public:
@@ -61,7 +61,7 @@ class ESPiLight {
   /**
    * Parse pulse train and fire callback
    */
-  int parsePulseTrain(uint16_t *pulses, int length);
+  int parsePulseTrain(uint16_t *pulses, uint8_t length);
 
   /**
    * Process receiver queue and fire callback
@@ -80,13 +80,13 @@ class ESPiLight {
    * Get last received PulseTrain.
    * Returns: length of PulseTrain or 0 if not avaiable
    */
-  static int receivePulseTrain(uint16_t *pulses);
+  static uint8_t receivePulseTrain(uint16_t *pulses);
 
   /**
    * Check if new PulseTrain avaiable.
    * Returns: 0 if no new PulseTrain avaiable
    */
-  static int nextPulseTrainLength();
+  static uint8_t nextPulseTrainLength();
 
   /**
    * Enable Receiver. No need to call enableReceiver() after initReceiver().
