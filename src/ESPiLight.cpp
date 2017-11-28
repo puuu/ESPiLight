@@ -58,9 +58,9 @@ void ESPiLight::initReceiver(byte inputPin) {
   }
 }
 
-int ESPiLight::receivePulseTrain(uint16_t *pulses) {
-  int i = 0;
-  int length = nextPulseTrainLength();
+uint8_t ESPiLight::receivePulseTrain(uint16_t *pulses) {
+  uint8_t i = 0;
+  uint8_t length = nextPulseTrainLength();
 
   if (length > 0) {
     volatile PulseTrain_t &pulseTrain = _pulseTrains[_avaiablePulseTrain];
@@ -73,7 +73,7 @@ int ESPiLight::receivePulseTrain(uint16_t *pulses) {
   return length;
 }
 
-int ESPiLight::nextPulseTrainLength() {
+uint8_t ESPiLight::nextPulseTrainLength() {
   return _pulseTrains[_avaiablePulseTrain].length;
 }
 
@@ -130,7 +130,7 @@ void ESPiLight::enableReceiver() { _enabledReceiver = true; }
 void ESPiLight::disableReceiver() { _enabledReceiver = false; }
 
 void ESPiLight::loop() {
-  int length = 0;
+  uint8_t length = 0;
   uint16_t pulses[MAXPULSESTREAMLENGTH];
 
   length = receivePulseTrain(pulses);
@@ -281,7 +281,7 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
   return 0;
 }
 
-int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
+int ESPiLight::parsePulseTrain(uint16_t *pulses, uint8_t length) {
   int matches = 0;
   struct protocol_t *protocol = nullptr;
   struct protocols_t *pnode = used_protocols;
