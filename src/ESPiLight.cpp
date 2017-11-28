@@ -212,6 +212,10 @@ void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length,
 }
 
 int ESPiLight::send(const String &protocol, const String &json, int repeats) {
+  if (_outputPin < 0) {
+    DebugLn("No output pin set, cannot send");
+    return -1;
+  }
   int length = 0;
   uint16_t pulses[MAXPULSESTREAMLENGTH];
 
