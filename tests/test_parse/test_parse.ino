@@ -14,7 +14,7 @@ ESPiLight rf(-1);  // use -1 to disable transmitter
 // callback function. It is called on successfully received and parsed rc signal
 void rfRawCallback(const uint16_t *codes, int length) {
   // print pulse lengths
-  printPulseTran(codes, length);
+  printPulseTrain(codes, length);
 
   // format of pilight USB Nano
   String data = rf.pulseTrainToString(codes, length);
@@ -37,7 +37,7 @@ void rfCallback(const String &protocol, const String &message, int status,
   Serial.println();
 }
 
-void printPulseTran(const uint16_t *codes, int length) {
+void printPulseTrain(const uint16_t *codes, int length) {
   Serial.print("RAW signal: ");
   for (int i = 0; i < length; i++) {
     Serial.print(codes[i]);
@@ -59,7 +59,7 @@ void setup() {
   // pulse train from ppilight json message
   length = rf.createPulseTrain(pulses, PROTOCOL, JMESSAGE);
   // print pulse lengths
-  printPulseTran(pulses, length);
+  printPulseTrain(pulses, length);
   // format of pilight USB Nano
   String data = rf.pulseTrainToString(pulses, length);
   Serial.print("string format: ");
@@ -69,7 +69,7 @@ void setup() {
   // pilight USB Nano string to pulses
   length = rf.stringToPulseTrain(data, pulses, MAXPULSESTREAMLENGTH);
   // print pulse lengths
-  printPulseTran(pulses, length);
+  printPulseTrain(pulses, length);
   // format of pilight USB Nano
   data = rf.pulseTrainToString(pulses, length);
   Serial.print("string format: ");
