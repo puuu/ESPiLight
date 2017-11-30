@@ -56,6 +56,11 @@ void setup() {
   int length = 0;
   uint16_t pulses[MAXPULSESTREAMLENGTH];
 
+  // print free heap memory
+  Serial.println();
+  Serial.print("Free heap: ");
+  Serial.println(ESP.getFreeHeap());
+
   // pulse train from ppilight json message
   length = rf.createPulseTrain(pulses, PROTOCOL, JMESSAGE);
   // print pulse lengths
