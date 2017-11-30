@@ -10,9 +10,7 @@
 
 ESPiLight rf(TRANSMITTER_PIN);
 
-void setup() {
-  Serial.begin(115200);
-}
+void setup() { Serial.begin(115200); }
 
 // Toggle state of elro 800 switch evrey 2 s
 void loop() {
