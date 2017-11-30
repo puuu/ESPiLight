@@ -413,8 +413,12 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
       end = data.indexOf(',', start);
     }
     end = data.indexOf(';', start);
-    if (end < 0) end = data.indexOf('@', start);
-    if (end < 0) return -2;
+    if (end < 0) {
+      end = data.indexOf('@', start);
+    }
+    if (end < 0) {
+      return -2;
+    }
     plstypes[nrpulses++] = data.substring(start, end).toInt();
 
     int codelen = 0;
