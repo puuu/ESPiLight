@@ -12,7 +12,7 @@
 ESPiLight rf(-1);  //use -1 to disable transmitter
 
 // callback function. It is called on successfully received and parsed rc signal
-void rfRawCallback(const uint16_t* codes, int length) {
+void rfRawCallback(const uint16_t* codes, uint8_t length) {
   // print pulse lengths
   printPulseTran(codes, length);
   

@@ -16,12 +16,13 @@
   along with library. If not, see <http://www.gnu.org/licenses/>
 */
 
-#include <Arduino.h>
 #include "aprintf.h"
+#include <Arduino.h>
 
 void exit(int n) {
   Serial.print(F("EXIT: "));
-  Serial.println(n);    
+  Serial.println(n);
   ESP.restart();
-  while(true);
+  while (true)
+    ;
 }
