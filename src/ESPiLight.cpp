@@ -159,6 +159,7 @@ ESPiLight::ESPiLight(int8_t outputPin) {
   _outputPin = outputPin;
   _callback = nullptr;
   _rawCallback = nullptr;
+  _echoEnabled = true;
 
   if (_outputPin >= 0) {
     pinMode(static_cast<uint8_t>(_outputPin), OUTPUT);
@@ -182,10 +183,10 @@ void ESPiLight::setPulseTrainCallBack(PulseTrainCallBack rawCallback) {
 
 void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length,
                                int repeats) {
-  // bool receiverState = _enabledReceiver;
   int r = 0, x = 0;
   if (_outputPin >= 0) {
-    // disableReceiver()
+    bool receiverState = _enabledReceiver;
+    _enabledReceiver = (_echoEnabled && receiverState);
     for (r = 0; r < repeats; r++) {
       for (x = 0; x < length; x += 2) {
         digitalWrite(static_cast<uint8_t>(_outputPin), HIGH);
@@ -197,7 +198,7 @@ void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length,
       }
     }
     digitalWrite(static_cast<uint8_t>(_outputPin), LOW);
-    // if (receiverState) enableReceiver();
+    _enabledReceiver = receiverState;
   }
 }
 
@@ -526,3 +527,5 @@ void ESPiLight::limitProtocols(const String &protos) {
 
   json_delete(message);
 }
+
+void ESPiLight::setEchoEnabled(bool enabled) { _echoEnabled = enabled; }
