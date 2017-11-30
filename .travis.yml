@@ -24,3 +24,4 @@ install:
 
 script:
   - platformio ci --lib="." --board=huzzah --board=d1_mini
+  - make stylecheck
