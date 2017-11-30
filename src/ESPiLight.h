@@ -99,9 +99,9 @@ class ESPiLight {
   static void disableReceiver();
 
   /**
-   * interruptHandler is called on every change in the input signal. If
-   * RcPilight::initReceiver is called
-   * with interrupt <0, you have to call interruptHandler() yourself. (Or use
+   * interruptHandler is called on every change in the input
+   * signal. If RcPilight::initReceiver is called with interrupt <0,
+   * you have to call interruptHandler() yourself. (Or use
    * InterruptChain)
    */
   static void interruptHandler();
