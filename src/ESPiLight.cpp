@@ -29,8 +29,8 @@
 extern "C" {
 #include "pilight/libs/pilight/protocols/protocol.h"
 }
-struct protocols_t *protocols = nullptr;
-struct protocols_t *used_protocols = nullptr;
+protocols_t *protocols = nullptr;
+protocols_t *used_protocols = nullptr;
 
 volatile PulseTrain_t ESPiLight::_pulseTrains[RECEIVER_BUFFER_SIZE];
 bool ESPiLight::_enabledReceiver;
@@ -223,8 +223,8 @@ int ESPiLight::send(const String &protocol, const String &json, int repeats) {
 
 int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
                                 const String &content) {
-  struct protocol_t *protocol = nullptr;
-  struct protocols_t *pnode = used_protocols;
+  protocol_t *protocol = nullptr;
+  protocols_t *pnode = used_protocols;
   int return_value = EXIT_FAILURE;
   JsonNode *message;
 
@@ -268,8 +268,8 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
 
 int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
   int matches = 0;
-  struct protocol_t *protocol = nullptr;
-  struct protocols_t *pnode = used_protocols;
+  protocol_t *protocol = nullptr;
+  protocols_t *pnode = used_protocols;
 
   // DebugLn("piLightParsePulseTrain start");
   while ((pnode != nullptr) && (_callback != nullptr)) {
@@ -450,7 +450,7 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
 }
 
 static protocols_t *find_proto(const char *name) {
-  struct protocols_t *pnode = protocols;
+  protocols_t *pnode = protocols;
   while (pnode != nullptr) {
     if (strcmp(name, pnode->listener->id) == 0) {
       return pnode;
@@ -474,9 +474,9 @@ void ESPiLight::limitProtocols(const String &protos) {
   }
 
   if (used_protocols != protocols) {
-    struct protocols_t *pnode = used_protocols;
+    protocols_t *pnode = used_protocols;
     while (pnode != nullptr) {
-      struct protocols_t *tmp = pnode;
+      protocols_t *tmp = pnode;
       pnode = pnode->next;
       delete tmp;
     }
