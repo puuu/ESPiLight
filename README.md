@@ -88,6 +88,7 @@ Big thanks goes to the pilight community, which implemented all the
 434MHz protocols. If you want to integrate more protocols, please
 contribute directly to [pilight](https://pilight.org/).
 
+[@janLo](https://github.com/janLo) [contributed](https://github.com/puuu/ESPiLight/graphs/contributors) some major cleanups and new functionalities to the library.
 
 ## Other similar projects
 
