@@ -72,6 +72,11 @@ class ESPiLight {
   void setPulseTrainCallBack(PulseTrainCallBack rawCallback);
 
   /**
+   * If set to true, the receiver will temporarely be disabled when sending.
+   */
+  void setEchoEnabled(bool enabled);
+
+  /**
    * Initialise receiver
    */
   static void initReceiver(byte inputPin);
@@ -130,6 +135,7 @@ class ESPiLight {
   ESPiLightCallBack _callback;
   PulseTrainCallBack _rawCallback;
   int8_t _outputPin;
+  bool _echoEnabled;
 
   /**
    * Quasi-reset. Called when the current edge is too long or short.
