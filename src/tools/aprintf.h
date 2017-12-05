@@ -21,7 +21,18 @@
 
 #include <stdio.h>
 
+#ifndef __cplusplus
+#include <pgmspace.h>
+#define FSTR(s)                            \
+  (__extension__({                         \
+    static const char __c[] PROGMEM = (s); \
+    &__c[0];                               \
+  }))
+#define printf(fmt, ...) printf(FSTR(fmt), ##__VA_ARGS__)
 #define fprintf(stream, args...) printf(args)
+#else
+#define fprintf(stream, args...) printf(args)
+#endif
 
 #ifdef __cplusplus
 extern "C" {
