@@ -159,7 +159,7 @@ ESPiLight::ESPiLight(int8_t outputPin) {
   _outputPin = outputPin;
   _callback = nullptr;
   _rawCallback = nullptr;
-  _echoEnabled = true;
+  _echoEnabled = false;
 
   if (_outputPin >= 0) {
     pinMode(static_cast<uint8_t>(_outputPin), OUTPUT);
