@@ -16,12 +16,12 @@
   along with library. If not, see <http://www.gnu.org/licenses/>
 */
 
+#include <ESPiLight.h>
+
 // ESP32 doesn't define ICACHE_RAM_ATTR
 #ifndef ICACHE_RAM_ATTR
 #define ICACHE_RAM_ATTR IRAM_ATTR
 #endif
-
-#include <ESPiLight.h>
 
 #ifdef DEBUG
 #define Debug(x) Serial.print(x)
