@@ -36,6 +36,12 @@ void setup() {
   // pulse train from ppilight json message
   length = rf.createPulseTrain(pulses, PROTOCOL, JMESSAGE);
 
+  // print available and enabled protocols
+  Serial.print("Available protocols: ");
+  Serial.println(rf.availableProtocols());
+  Serial.print("Enabled protocols: ");
+  Serial.println(rf.enabledProtocols());
+
   // parse pulse train multiple times
   for (int i = 0; i < 5; i++) {
     Serial.println();
@@ -49,6 +55,12 @@ void setup() {
   // Limit the protocol
   rf.limitProtocols("[\"" PROTOCOL "\"]");
 
+  // print available and enabled protocols
+  Serial.print("Available protocols: ");
+  Serial.println(rf.availableProtocols());
+  Serial.print("Enabled protocols: ");
+  Serial.println(rf.enabledProtocols());
+
   // parse pulse train multiple times
   for (int i = 0; i < 5; i++) {
     Serial.println();
@@ -61,6 +73,12 @@ void setup() {
 
   // Reset the filter
   rf.limitProtocols("[]");
+
+  // print available and enabled protocols
+  Serial.print("Available protocols: ");
+  Serial.println(rf.availableProtocols());
+  Serial.print("Enabled protocols: ");
+  Serial.println(rf.enabledProtocols());
 
   // parse pulse train multiple times
   for (int i = 0; i < 5; i++) {
