@@ -49,6 +49,13 @@ branch. The `release` is used to integrate the pilight files and for
 version tagging, like necessary for the Arduino Library Manager
 crawler.
 
+To prevent formating issues, please make sure that your code is proper
+formatted. We use the `clang-format` tool with the `Google` style.
+You can just format the code by calling
+```console
+$ clang-format -style=Google -i <source-file>
+```
+
 
 ### Install from source
 
@@ -81,6 +88,7 @@ Big thanks goes to the pilight community, which implemented all the
 434MHz protocols. If you want to integrate more protocols, please
 contribute directly to [pilight](https://pilight.org/).
 
+[@janLo](https://github.com/janLo) [contributed](https://github.com/puuu/ESPiLight/graphs/contributors) some major cleanups and new functionalities to the library.
 
 ## Other similar projects
 

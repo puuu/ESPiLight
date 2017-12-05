@@ -6,16 +6,16 @@
 
 #include <ESPiLight.h>
 
-#define RECEIVER_PIN 4 //any intterupt able pin
+#define RECEIVER_PIN 4  // any intterupt able pin
 #define TRANSMITTER_PIN 13
 
-ESPiLight rf(TRANSMITTER_PIN);  //use -1 to disable transmitter
+ESPiLight rf(TRANSMITTER_PIN);  // use -1 to disable transmitter
 
 // callback function. It is called on successfully received and parsed rc signal
 void rfRawCallback(const uint16_t* codes, int length) {
   // print pulse lengths
   Serial.print("RAW signal: ");
-  for(int i=0; i < length; i++) {
+  for (int i = 0; i < length; i++) {
     Serial.print(codes[i]);
     Serial.print(' ');
   }
@@ -30,9 +30,9 @@ void rfRawCallback(const uint16_t* codes, int length) {
 
 void setup() {
   Serial.begin(115200);
-  //set callback funktion for raw messages
+  // set callback funktion for raw messages
   rf.setPulseTrainCallBack(rfRawCallback);
-  //inittilize receiver
+  // inittilize receiver
   rf.initReceiver(RECEIVER_PIN);
 }
 

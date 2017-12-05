@@ -82,3 +82,10 @@ release: $(SRC_DIR)/libs
 
 clean:
 	-rm $(DST_FILES)
+
+stylecheck:
+	RESULT=0;\
+	for file in src/*.h src/*.cpp src/tools/*.h src/tools/*.cpp tests/*/*.ino examples/*/*.ino; do\
+	  clang-format -style=google "$$file" | diff -u "$$file" - || RESULT=$$?;\
+	done;\
+	exit $$RESULT
