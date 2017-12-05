@@ -119,6 +119,16 @@ class ESPiLight {
    */
   static void limitProtocols(const String &protos);
 
+  /**
+   * Return a json array containing all the available protocols.
+   */
+  static String availableProtocols();
+
+  /**
+   * Return an json array containing all the currently enabled protocols
+   */
+  static String enabledProtocols();
+
   static unsigned int minrawlen;
   static unsigned int maxrawlen;
   static unsigned int mingaplen;
