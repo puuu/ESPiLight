@@ -362,14 +362,12 @@ static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback) {
 }
 
 String ESPiLight::pulseTrainToString(const uint16_t *codes, size_t length) {
-  int i = 0, x = 0, match = 0;
+  unsigned int i = 0;
+  unsigned int x = 0;
+  bool match = false;
   int diff = 0;
-  int plstypes[MAX_PULSE_TYPES];
+  uint16_t plstypes[MAX_PULSE_TYPES];
   String data("");
-
-  if (length <= 0) {
-    return String("");
-  }
 
   for (x = 0; x < MAX_PULSE_TYPES; x++) {
     plstypes[x] = 0;
@@ -377,21 +375,21 @@ String ESPiLight::pulseTrainToString(const uint16_t *codes, size_t length) {
 
   data.reserve(6 + length);
   // Debug("pulseTrainToString: ");
-  int p = 0;
+  unsigned int p = 0;
   data += "c:";
   for (i = 0; i < length; i++) {
-    match = 0;
+    match = false;
     for (x = 0; x < MAX_PULSE_TYPES; x++) {
       /* We device these numbers by 10 to normalize them a bit */
       diff = (plstypes[x] / 50) - (codes[i] / 50);
       if ((diff >= -2) && (diff <= 2)) {
         /* Write numbers */
         data += (char)('0' + ((char)x));
-        match = 1;
+        match = true;
         break;
       }
     }
-    if (match == 0) {
+    if (!match) {
       plstypes[p++] = codes[i];
       data += (char)('0' + ((char)(p - 1)));
       if (p >= MAX_PULSE_TYPES) {
