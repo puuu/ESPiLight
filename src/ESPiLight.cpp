@@ -122,8 +122,7 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
 }
 
 void ESPiLight::resetReceiver() {
-  int i = 0;
-  for (i = 0; i < RECEIVER_BUFFER_SIZE; i++) {
+  for (unsigned int i = 0; i < RECEIVER_BUFFER_SIZE; i++) {
     _pulseTrains[i].length = 0;
   }
   _avaiablePulseTrain = 0;
