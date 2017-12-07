@@ -181,19 +181,18 @@ void ESPiLight::setPulseTrainCallBack(PulseTrainCallBack rawCallback) {
   _rawCallback = rawCallback;
 }
 
-void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length,
-                               int repeats) {
-  int r = 0, x = 0;
+void ESPiLight::sendPulseTrain(const uint16_t *pulses, size_t length,
+                               size_t repeats) {
   if (_outputPin >= 0) {
     bool receiverState = _enabledReceiver;
     _enabledReceiver = (_echoEnabled && receiverState);
-    for (r = 0; r < repeats; r++) {
-      for (x = 0; x < length; x += 2) {
+    for (unsigned int r = 0; r < repeats; r++) {
+      for (unsigned int i = 0; i < length; i += 2) {
         digitalWrite((uint8_t)_outputPin, HIGH);
-        delayMicroseconds(pulses[x]);
+        delayMicroseconds(pulses[i]);
         digitalWrite((uint8_t)_outputPin, LOW);
-        if (x + 1 < length) {
-          delayMicroseconds(pulses[x + 1]);
+        if (i + 1 < length) {
+          delayMicroseconds(pulses[i + 1]);
         }
       }
     }

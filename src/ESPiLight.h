@@ -51,7 +51,8 @@ class ESPiLight {
   /**
    * Transmit pulse train
    */
-  void sendPulseTrain(const uint16_t *pulses, int length, int repeats = 10);
+  void sendPulseTrain(const uint16_t *pulses, size_t length,
+                      size_t repeats = 10);
 
   /**
    * Transmit Pilight json message
