@@ -362,46 +362,40 @@ static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback) {
 }
 
 String ESPiLight::pulseTrainToString(const uint16_t *codes, size_t length) {
-  unsigned int i = 0;
-  unsigned int x = 0;
   bool match = false;
   int diff = 0;
-  uint16_t plstypes[MAX_PULSE_TYPES];
+
+  uint8_t nrpulses = 0;  // number of pulse types
+  uint16_t plstypes[MAX_PULSE_TYPES] = {};
+
   String data("");
-
-  for (x = 0; x < MAX_PULSE_TYPES; x++) {
-    plstypes[x] = 0;
-  }
-
   data.reserve(6 + length);
-  // Debug("pulseTrainToString: ");
-  unsigned int p = 0;
   data += "c:";
-  for (i = 0; i < length; i++) {
+  for (unsigned int i = 0; i < length; i++) {
     match = false;
-    for (x = 0; x < MAX_PULSE_TYPES; x++) {
-      /* We device these numbers by 10 to normalize them a bit */
-      diff = (plstypes[x] / 50) - (codes[i] / 50);
+    for (uint8_t j = 0; j < MAX_PULSE_TYPES; j++) {
+      // We device these numbers by 10 to normalize them a bit
+      diff = (plstypes[j] / 50) - (codes[i] / 50);
       if ((diff >= -2) && (diff <= 2)) {
-        /* Write numbers */
-        data += (char)('0' + ((char)x));
+        // Write numbers
+        data += (char)('0' + ((char)j));
         match = true;
         break;
       }
     }
     if (!match) {
-      plstypes[p++] = codes[i];
-      data += (char)('0' + ((char)(p - 1)));
-      if (p >= MAX_PULSE_TYPES) {
+      plstypes[nrpulses++] = codes[i];
+      data += (char)('0' + ((char)(nrpulses - 1)));
+      if (nrpulses >= MAX_PULSE_TYPES) {
         DebugLn("too many pulse types");
         return String("");
       }
     }
   }
   data += ";p:";
-  for (i = 0; i < p; i++) {
+  for (uint8_t i = 0; i < nrpulses; i++) {
     data += plstypes[i];
-    if (i + 1 < p) {
+    if (i + 1 < nrpulses) {
       data += ',';
     }
   }
