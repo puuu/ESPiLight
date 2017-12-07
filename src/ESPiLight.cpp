@@ -126,6 +126,7 @@ void ESPiLight::resetReceiver() {
   for (i = 0; i < RECEIVER_BUFFER_SIZE; i++) {
     _pulseTrains[i].length = 0;
   }
+  _avaiablePulseTrain = 0;
   _actualPulseTrain = 0;
   _nrpulses = 0;
 }
