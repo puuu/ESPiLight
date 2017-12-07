@@ -222,7 +222,7 @@ int ESPiLight::send(const String &protocol, const String &json,
     Debug(content);
     DebugLn(")");
     */
-    sendPulseTrain(pulses, length, repeats);
+    sendPulseTrain(pulses, (unsigned)length, repeats);
   }
   return length;
 }
