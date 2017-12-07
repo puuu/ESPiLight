@@ -405,50 +405,52 @@ String ESPiLight::pulseTrainToString(const uint16_t *codes, size_t length) {
 
 int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
                                   size_t maxlength) {
-  unsigned int start = 0;
-  int end = 0;
-  int pulse_index;
-  unsigned int i = 0;
-  uint16_t plstypes[MAX_PULSE_TYPES];
+  unsigned int length = 0;    // length of pulse train
+  unsigned int nrpulses = 0;  // number of pulse types
+  uint16_t plstypes[MAX_PULSE_TYPES] = {};
 
-  for (i = 0; i < MAX_PULSE_TYPES; i++) {
-    plstypes[i] = 0;
-  }
-
+  // validate data string
   int scode = data.indexOf('c') + 2;
+  if (scode < 0 || (unsigned)scode > data.length()) {
+    DebugLn("'c' not found in data string, or has no data");
+    return -1;
+  }
   int spulse = data.indexOf('p') + 2;
-  if (scode > 0 && (unsigned)scode < data.length() && spulse > 0 &&
-      (unsigned)spulse < data.length()) {
-    unsigned int nrpulses = 0;
-    start = (unsigned)spulse;
-    end = data.indexOf(',', start);
-    while (end > 0) {
-      plstypes[nrpulses++] =
-          (uint16_t)data.substring(start, (unsigned)end).toInt();
-      start = (unsigned)end + 1;
-      end = data.indexOf(',', start);
-    }
-    end = data.indexOf(';', start);
-    if (end < 0) {
-      end = data.indexOf('@', start);
-    }
-    if (end < 0) {
-      return -2;
-    }
+  if (spulse < 0 || (unsigned)spulse > data.length()) {
+    DebugLn("'p' not found in data string, or has no data");
+    return -1;
+  }
+  // parsing pulse types
+  unsigned int start = (unsigned)spulse;
+  int end = data.indexOf(',', start);
+  while (end > 0) {
     plstypes[nrpulses++] =
         (uint16_t)data.substring(start, (unsigned)end).toInt();
-
-    unsigned int codelen = 0;
-    for (i = (unsigned)scode; i < data.length(); i++) {
-      if ((data[i] == ';') || (data[i] == '@')) break;
-      if (i >= maxlength) break;
-      pulse_index = data[i] - '0';
-      if ((pulse_index < 0) || ((unsigned)pulse_index >= nrpulses)) return -3;
-      codes[codelen++] = plstypes[pulse_index];
-    }
-    return codelen;
+    start = (unsigned)end + 1;
+    end = data.indexOf(',', start);
   }
-  return -1;
+  end = data.indexOf(';', start);
+  if (end < 0) {
+    end = data.indexOf('@', start);
+  }
+  if (end < 0) {
+    DebugLn("';' or '@' not found in data string");
+    return -2;
+  }
+  plstypes[nrpulses++] = (uint16_t)data.substring(start, (unsigned)end).toInt();
+  // parsing pulses
+  int pulse_index = 0;
+  for (unsigned int i = (unsigned)scode; i < data.length(); i++) {
+    if ((data[i] == ';') || (data[i] == '@')) break;
+    if (i >= maxlength) break;
+    pulse_index = data[i] - '0';
+    if ((pulse_index < 0) || ((unsigned)pulse_index >= nrpulses)) {
+      DebugLn("Pulse type not defined");
+      return -3;
+    }
+    codes[length++] = plstypes[pulse_index];
+  }
+  return length;
 }
 
 static protocols_t *find_proto(const char *name) {
