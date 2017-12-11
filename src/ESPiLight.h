@@ -168,6 +168,7 @@ class ESPiLight {
   static uint8_t _avaiablePulseTrain;
   static volatile unsigned long _lastChange;  // Timestamp of previous edge
   static volatile uint8_t _nrpulses;
+  static int16_t _interrupt;
 };
 
 #endif

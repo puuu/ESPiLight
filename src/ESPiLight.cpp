@@ -44,6 +44,7 @@ uint8_t ESPiLight::_avaiablePulseTrain = 0;
 volatile unsigned long ESPiLight::_lastChange =
     0;  // Timestamp of previous edge
 volatile uint8_t ESPiLight::_nrpulses = 0;
+int16_t ESPiLight::_interrupt = NOT_AN_INTERRUPT;
 
 uint8_t ESPiLight::minrawlen = 5;
 uint8_t ESPiLight::maxrawlen = MAXPULSESTREAMLENGTH;
@@ -53,7 +54,14 @@ uint16_t ESPiLight::maxgaplen = 10000;
 static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback);
 
 void ESPiLight::initReceiver(byte inputPin) {
-  int interrupt = digitalPinToInterrupt(inputPin);
+  int16_t interrupt = digitalPinToInterrupt(inputPin);
+  if (_interrupt == interrupt) {
+    return;
+  }
+  if (_interrupt >= 0) {
+    detachInterrupt((uint8_t)_interrupt);
+  }
+  _interrupt = interrupt;
 
   resetReceiver();
   enableReceiver();
