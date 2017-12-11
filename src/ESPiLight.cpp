@@ -300,7 +300,7 @@ size_t ESPiLight::parsePulseTrain(uint16_t *pulses, uint8_t length) {
         }
 
         /* Reset # of repeats after a certain delay */
-        if (((int)protocol->second - (int)protocol->first) > 500000) {
+        if ((protocol->second - protocol->first) > 500000) {
           protocol->repeats = 0;
         }
 
