@@ -164,8 +164,8 @@ class ESPiLight {
                                  // enabled. If false, interruptHandler will
                                  // return immediately.
   static volatile PulseTrain_t _pulseTrains[];
-  static volatile int _actualPulseTrain;
-  static int _avaiablePulseTrain;
+  static volatile uint8_t _actualPulseTrain;
+  static uint8_t _avaiablePulseTrain;
   static volatile unsigned long _lastChange;  // Timestamp of previous edge
   static volatile uint8_t _nrpulses;
 };

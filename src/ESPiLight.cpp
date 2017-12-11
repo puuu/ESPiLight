@@ -39,8 +39,8 @@ protocols_t *used_protocols = nullptr;
 
 volatile PulseTrain_t ESPiLight::_pulseTrains[RECEIVER_BUFFER_SIZE];
 bool ESPiLight::_enabledReceiver;
-volatile int ESPiLight::_actualPulseTrain = 0;
-int ESPiLight::_avaiablePulseTrain = 0;
+volatile uint8_t ESPiLight::_actualPulseTrain = 0;
+uint8_t ESPiLight::_avaiablePulseTrain = 0;
 volatile unsigned long ESPiLight::_lastChange =
     0;  // Timestamp of previous edge
 volatile uint8_t ESPiLight::_nrpulses = 0;
