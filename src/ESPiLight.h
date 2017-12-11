@@ -37,7 +37,7 @@ typedef struct PulseTrain_t {
 } PulseTrain_t;
 
 typedef void (*ESPiLightCallBack)(const String &protocol, const String &message,
-                                  int status, int repeats,
+                                  int status, size_t repeats,
                                   const String &deviceID);
 typedef void (*PulseTrainCallBack)(const uint16_t *pulses, size_t length);
 

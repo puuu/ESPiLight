@@ -25,7 +25,7 @@ void rfRawCallback(const uint16_t *codes, size_t length) {
 
 // callback function. It is called on successfully received and parsed rc signal
 void rfCallback(const String &protocol, const String &message, int status,
-                int repeats, const String &deviceID) {
+                size_t repeats, const String &deviceID) {
   Serial.print("parsed message [");
   Serial.print(protocol);  // protocoll used to parse
   Serial.print("][");

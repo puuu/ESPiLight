@@ -13,7 +13,7 @@ ESPiLight rf(TRANSMITTER_PIN);  // use -1 to disable transmitter
 
 // callback function. It is called on successfully received and parsed rc signal
 void rfCallback(const String &protocol, const String &message, int status,
-                int repeats, const String &deviceID) {
+                size_t repeats, const String &deviceID) {
   Serial.print("RF signal arrived [");
   Serial.print(protocol);  // protocoll used to parse
   Serial.print("][");
