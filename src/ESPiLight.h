@@ -20,6 +20,7 @@
 #define ESPILIGHT_H
 
 #include <Arduino.h>
+#include <functional>
 
 #define RECEIVER_BUFFER_SIZE 10
 
@@ -36,10 +37,11 @@ typedef struct PulseTrain_t {
   uint8_t length;
 } PulseTrain_t;
 
-typedef void (*ESPiLightCallBack)(const String &protocol, const String &message,
-                                  int status, size_t repeats,
-                                  const String &deviceID);
-typedef void (*PulseTrainCallBack)(const uint16_t *pulses, size_t length);
+typedef std::function<void(const String &protocol, const String &message,
+                           int status, size_t repeats, const String &deviceID)>
+    ESPiLightCallBack;
+typedef std::function<void(const uint16_t *pulses, size_t length)>
+    PulseTrainCallBack;
 
 class ESPiLight {
  public:
