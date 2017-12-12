@@ -72,13 +72,12 @@ void ESPiLight::initReceiver(byte inputPin) {
 }
 
 uint8_t ESPiLight::receivePulseTrain(uint16_t *pulses) {
-  uint8_t i = 0;
   uint8_t length = nextPulseTrainLength();
 
   if (length > 0) {
     volatile PulseTrain_t &pulseTrain = _pulseTrains[_avaiablePulseTrain];
     _avaiablePulseTrain = (_avaiablePulseTrain + 1) % RECEIVER_BUFFER_SIZE;
-    for (i = 0; i < length; i++) {
+    for (uint8_t i = 0; i < length; i++) {
       pulses[i] = pulseTrain.pulses[i];
     }
     pulseTrain.length = 0;
