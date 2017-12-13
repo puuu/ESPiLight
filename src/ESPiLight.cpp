@@ -39,38 +39,45 @@ protocols_t *used_protocols = nullptr;
 
 volatile PulseTrain_t ESPiLight::_pulseTrains[RECEIVER_BUFFER_SIZE];
 bool ESPiLight::_enabledReceiver;
-volatile int ESPiLight::_actualPulseTrain = 0;
-int ESPiLight::_avaiablePulseTrain = 0;
+volatile uint8_t ESPiLight::_actualPulseTrain = 0;
+uint8_t ESPiLight::_avaiablePulseTrain = 0;
 volatile unsigned long ESPiLight::_lastChange =
     0;  // Timestamp of previous edge
 volatile uint8_t ESPiLight::_nrpulses = 0;
+int16_t ESPiLight::_interrupt = NOT_AN_INTERRUPT;
 
-unsigned int ESPiLight::minrawlen = 5;
-unsigned int ESPiLight::maxrawlen = MAXPULSESTREAMLENGTH;
-unsigned int ESPiLight::mingaplen = 5100;
-unsigned int ESPiLight::maxgaplen = 10000;
+uint8_t ESPiLight::minrawlen = 5;
+uint8_t ESPiLight::maxrawlen = MAXPULSESTREAMLENGTH;
+uint16_t ESPiLight::mingaplen = 5100;
+uint16_t ESPiLight::maxgaplen = 10000;
 
 static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback);
 
 void ESPiLight::initReceiver(byte inputPin) {
-  int interrupt = digitalPinToInterrupt(inputPin);
+  int16_t interrupt = digitalPinToInterrupt(inputPin);
+  if (_interrupt == interrupt) {
+    return;
+  }
+  if (_interrupt >= 0) {
+    detachInterrupt((uint8_t)_interrupt);
+  }
+  _interrupt = interrupt;
 
   resetReceiver();
   enableReceiver();
 
   if (interrupt >= 0) {
-    attachInterrupt(interrupt, interruptHandler, CHANGE);
+    attachInterrupt((uint8_t)interrupt, interruptHandler, CHANGE);
   }
 }
 
-int ESPiLight::receivePulseTrain(uint16_t *pulses) {
-  int i = 0;
-  int length = nextPulseTrainLength();
+uint8_t ESPiLight::receivePulseTrain(uint16_t *pulses) {
+  uint8_t length = nextPulseTrainLength();
 
   if (length > 0) {
     volatile PulseTrain_t &pulseTrain = _pulseTrains[_avaiablePulseTrain];
     _avaiablePulseTrain = (_avaiablePulseTrain + 1) % RECEIVER_BUFFER_SIZE;
-    for (i = 0; i < length; i++) {
+    for (uint8_t i = 0; i < length; i++) {
       pulses[i] = pulseTrain.pulses[i];
     }
     pulseTrain.length = 0;
@@ -78,7 +85,7 @@ int ESPiLight::receivePulseTrain(uint16_t *pulses) {
   return length;
 }
 
-int ESPiLight::nextPulseTrainLength() {
+uint8_t ESPiLight::nextPulseTrainLength() {
   return _pulseTrains[_avaiablePulseTrain].length;
 }
 
@@ -99,8 +106,8 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
     if (duration > MIN_PULSELENGTH) {
       if (duration < MAX_PULSELENGTH) {
         /* All codes are buffered */
-        codes[_nrpulses] = duration;
-        _nrpulses = (_nrpulses + 1) % MAXPULSESTREAMLENGTH;
+        codes[_nrpulses] = (uint16_t)duration;
+        _nrpulses = (uint8_t)((_nrpulses + 1) % MAXPULSESTREAMLENGTH);
         /* Let's match footers */
         if (duration > mingaplen) {
           // Debug('g');
@@ -122,10 +129,10 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
 }
 
 void ESPiLight::resetReceiver() {
-  int i = 0;
-  for (i = 0; i < RECEIVER_BUFFER_SIZE; i++) {
+  for (unsigned int i = 0; i < RECEIVER_BUFFER_SIZE; i++) {
     _pulseTrains[i].length = 0;
   }
+  _avaiablePulseTrain = 0;
   _actualPulseTrain = 0;
   _nrpulses = 0;
 }
@@ -151,7 +158,7 @@ void ESPiLight::loop() {
     }
     DebugLn();
     */
-    parsePulseTrain(pulses, length);
+    parsePulseTrain(pulses, (uint8_t)length);
   }
 }
 
@@ -181,19 +188,18 @@ void ESPiLight::setPulseTrainCallBack(PulseTrainCallBack rawCallback) {
   _rawCallback = rawCallback;
 }
 
-void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length,
-                               int repeats) {
-  int r = 0, x = 0;
+void ESPiLight::sendPulseTrain(const uint16_t *pulses, size_t length,
+                               size_t repeats) {
   if (_outputPin >= 0) {
     bool receiverState = _enabledReceiver;
     _enabledReceiver = (_echoEnabled && receiverState);
-    for (r = 0; r < repeats; r++) {
-      for (x = 0; x < length; x += 2) {
+    for (unsigned int r = 0; r < repeats; r++) {
+      for (unsigned int i = 0; i < length; i += 2) {
         digitalWrite((uint8_t)_outputPin, HIGH);
-        delayMicroseconds(pulses[x]);
+        delayMicroseconds(pulses[i]);
         digitalWrite((uint8_t)_outputPin, LOW);
-        if (x + 1 < length) {
-          delayMicroseconds(pulses[x + 1]);
+        if (i + 1 < length) {
+          delayMicroseconds(pulses[i + 1]);
         }
       }
     }
@@ -202,7 +208,8 @@ void ESPiLight::sendPulseTrain(const uint16_t *pulses, int length,
   }
 }
 
-int ESPiLight::send(const String &protocol, const String &json, int repeats) {
+int ESPiLight::send(const String &protocol, const String &json,
+                    size_t repeats) {
   if (_outputPin < 0) {
     DebugLn("No output pin set, cannot send");
     return -1;
@@ -222,7 +229,7 @@ int ESPiLight::send(const String &protocol, const String &json, int repeats) {
     Debug(content);
     DebugLn(")");
     */
-    sendPulseTrain(pulses, length, repeats);
+    sendPulseTrain(pulses, (unsigned)length, repeats);
   }
   return length;
 }
@@ -272,8 +279,8 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
   return 0;
 }
 
-int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
-  int matches = 0;
+size_t ESPiLight::parsePulseTrain(uint16_t *pulses, uint8_t length) {
+  size_t matches = 0;
   protocol_t *protocol = nullptr;
   protocols_t *pnode = used_protocols;
 
@@ -300,7 +307,7 @@ int ESPiLight::parsePulseTrain(uint16_t *pulses, int length) {
         }
 
         /* Reset # of repeats after a certain delay */
-        if (((int)protocol->second - (int)protocol->first) > 500000) {
+        if ((protocol->second - protocol->first) > 500000) {
           protocol->repeats = 0;
         }
 
@@ -361,49 +368,41 @@ static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback) {
              protocol->repeats, deviceId);
 }
 
-String ESPiLight::pulseTrainToString(const uint16_t *codes, int length) {
-  int i = 0, x = 0, match = 0;
+String ESPiLight::pulseTrainToString(const uint16_t *codes, size_t length) {
+  bool match = false;
   int diff = 0;
-  int plstypes[MAX_PULSE_TYPES];
+
+  uint8_t nrpulses = 0;  // number of pulse types
+  uint16_t plstypes[MAX_PULSE_TYPES] = {};
+
   String data("");
-
-  if (length <= 0) {
-    return String("");
-  }
-
-  for (x = 0; x < MAX_PULSE_TYPES; x++) {
-    plstypes[x] = 0;
-  }
-
   data.reserve(6 + length);
-  // Debug("pulseTrainToString: ");
-  int p = 0;
   data += "c:";
-  for (i = 0; i < length; i++) {
-    match = 0;
-    for (x = 0; x < MAX_PULSE_TYPES; x++) {
-      /* We device these numbers by 10 to normalize them a bit */
-      diff = (plstypes[x] / 50) - (codes[i] / 50);
+  for (unsigned int i = 0; i < length; i++) {
+    match = false;
+    for (uint8_t j = 0; j < MAX_PULSE_TYPES; j++) {
+      // We device these numbers by 10 to normalize them a bit
+      diff = (plstypes[j] / 50) - (codes[i] / 50);
       if ((diff >= -2) && (diff <= 2)) {
-        /* Write numbers */
-        data += (char)('0' + ((char)x));
-        match = 1;
+        // Write numbers
+        data += (char)('0' + ((char)j));
+        match = true;
         break;
       }
     }
-    if (match == 0) {
-      plstypes[p++] = codes[i];
-      data += (char)('0' + ((char)(p - 1)));
-      if (p >= MAX_PULSE_TYPES) {
+    if (!match) {
+      plstypes[nrpulses++] = codes[i];
+      data += (char)('0' + ((char)(nrpulses - 1)));
+      if (nrpulses >= MAX_PULSE_TYPES) {
         DebugLn("too many pulse types");
         return String("");
       }
     }
   }
   data += ";p:";
-  for (i = 0; i < p; i++) {
+  for (uint8_t i = 0; i < nrpulses; i++) {
     data += plstypes[i];
-    if (i + 1 < p) {
+    if (i + 1 < nrpulses) {
       data += ',';
     }
   }
@@ -412,47 +411,53 @@ String ESPiLight::pulseTrainToString(const uint16_t *codes, int length) {
 }
 
 int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
-                                  int maxlength) {
-  int start = 0, end = 0, pulse_index;
-  unsigned int i = 0;
-  int plstypes[MAX_PULSE_TYPES];
+                                  size_t maxlength) {
+  unsigned int length = 0;    // length of pulse train
+  unsigned int nrpulses = 0;  // number of pulse types
+  uint16_t plstypes[MAX_PULSE_TYPES] = {};
 
-  for (i = 0; i < MAX_PULSE_TYPES; i++) {
-    plstypes[i] = 0;
-  }
-
+  // validate data string
   int scode = data.indexOf('c') + 2;
-  int spulse = data.indexOf('p') + 2;
-  if (scode > 0 && (unsigned)scode < data.length() && spulse > 0 &&
-      (unsigned)spulse < data.length()) {
-    int nrpulses = 0;
-    start = spulse;
-    end = data.indexOf(',', start);
-    while (end > 0) {
-      plstypes[nrpulses++] = data.substring(start, end).toInt();
-      start = end + 1;
-      end = data.indexOf(',', start);
-    }
-    end = data.indexOf(';', start);
-    if (end < 0) {
-      end = data.indexOf('@', start);
-    }
-    if (end < 0) {
-      return -2;
-    }
-    plstypes[nrpulses++] = data.substring(start, end).toInt();
-
-    int codelen = 0;
-    for (i = scode; i < data.length(); i++) {
-      if ((data[i] == ';') || (data[i] == '@')) break;
-      if (i >= (unsigned)maxlength) break;
-      pulse_index = data[i] - '0';
-      if ((pulse_index < 0) || (pulse_index >= nrpulses)) return -3;
-      codes[codelen++] = plstypes[pulse_index];
-    }
-    return codelen;
+  if (scode < 0 || (unsigned)scode > data.length()) {
+    DebugLn("'c' not found in data string, or has no data");
+    return -1;
   }
-  return -1;
+  int spulse = data.indexOf('p') + 2;
+  if (spulse < 0 || (unsigned)spulse > data.length()) {
+    DebugLn("'p' not found in data string, or has no data");
+    return -1;
+  }
+  // parsing pulse types
+  unsigned int start = (unsigned)spulse;
+  int end = data.indexOf(',', start);
+  while (end > 0) {
+    plstypes[nrpulses++] =
+        (uint16_t)data.substring(start, (unsigned)end).toInt();
+    start = (unsigned)end + 1;
+    end = data.indexOf(',', start);
+  }
+  end = data.indexOf(';', start);
+  if (end < 0) {
+    end = data.indexOf('@', start);
+  }
+  if (end < 0) {
+    DebugLn("';' or '@' not found in data string");
+    return -2;
+  }
+  plstypes[nrpulses++] = (uint16_t)data.substring(start, (unsigned)end).toInt();
+  // parsing pulses
+  int pulse_index = 0;
+  for (unsigned int i = (unsigned)scode; i < data.length(); i++) {
+    if ((data[i] == ';') || (data[i] == '@')) break;
+    if (i >= maxlength) break;
+    pulse_index = data[i] - '0';
+    if ((pulse_index < 0) || ((unsigned)pulse_index >= nrpulses)) {
+      DebugLn("Pulse type not defined");
+      return -3;
+    }
+    codes[length++] = plstypes[pulse_index];
+  }
+  return length;
 }
 
 static protocols_t *find_proto(const char *name) {

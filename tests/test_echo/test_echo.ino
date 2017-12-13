@@ -1,5 +1,5 @@
 /*
- Basic ESPilight receive example
+ Basic ESPilight signal echo test
 
  https://github.com/puuu/espilight
 */
@@ -46,10 +46,21 @@ void setup() {
   rf.setCallback(rfCallback);
   // inittilize receiver
   rf.initReceiver(RECEIVER_PIN);
+  // enable signal echo
+  rf.setEchoEnabled(true);
 }
 
 void loop() {
+  int i;
   // process input queue and may fire calllback
-  rf.loop();
-  delay(10);
+  rf.send("elro_800_switch", "{\"systemcode\":17,\"unitcode\":1,\"on\":1}");
+  for (i = 0; i < 200; i++) {
+    delay(10);
+    rf.loop();
+  }
+  rf.send("elro_800_switch", "{\"systemcode\":17,\"unitcode\":1,\"off\":1}");
+  for (i = 0; i < 200; i++) {
+    delay(10);
+    rf.loop();
+  }
 }

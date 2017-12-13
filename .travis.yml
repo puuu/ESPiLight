@@ -11,6 +11,7 @@ cache:
 env:
   - PLATFORMIO_CI_SRC=tests/test_parse
   - PLATFORMIO_CI_SRC=tests/test_proto_limit
+  - PLATFORMIO_CI_SRC=tests/test_echo
   - PLATFORMIO_CI_SRC=examples/Receive
   - PLATFORMIO_CI_SRC=examples/Receive_Raw
   - PLATFORMIO_CI_SRC=examples/Transmit

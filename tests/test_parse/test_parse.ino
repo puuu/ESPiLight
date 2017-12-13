@@ -12,7 +12,7 @@
 ESPiLight rf(-1);  // use -1 to disable transmitter
 
 // callback function. It is called on successfully received and parsed rc signal
-void rfRawCallback(const uint16_t *codes, int length) {
+void rfRawCallback(const uint16_t *codes, size_t length) {
   // print pulse lengths
   printPulseTrain(codes, length);
 
@@ -25,7 +25,7 @@ void rfRawCallback(const uint16_t *codes, int length) {
 
 // callback function. It is called on successfully received and parsed rc signal
 void rfCallback(const String &protocol, const String &message, int status,
-                int repeats, const String &deviceID) {
+                size_t repeats, const String &deviceID) {
   Serial.print("parsed message [");
   Serial.print(protocol);  // protocoll used to parse
   Serial.print("][");

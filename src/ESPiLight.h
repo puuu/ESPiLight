@@ -20,6 +20,7 @@
 #define ESPILIGHT_H
 
 #include <Arduino.h>
+#include <functional>
 
 #define RECEIVER_BUFFER_SIZE 10
 
@@ -36,10 +37,11 @@ typedef struct PulseTrain_t {
   uint8_t length;
 } PulseTrain_t;
 
-typedef void (*ESPiLightCallBack)(const String &protocol, const String &message,
-                                  int status, int repeats,
-                                  const String &deviceID);
-typedef void (*PulseTrainCallBack)(const uint16_t *pulses, int length);
+typedef std::function<void(const String &protocol, const String &message,
+                           int status, size_t repeats, const String &deviceID)>
+    ESPiLightCallBack;
+typedef std::function<void(const uint16_t *pulses, size_t length)>
+    PulseTrainCallBack;
 
 class ESPiLight {
  public:
@@ -51,17 +53,18 @@ class ESPiLight {
   /**
    * Transmit pulse train
    */
-  void sendPulseTrain(const uint16_t *pulses, int length, int repeats = 10);
+  void sendPulseTrain(const uint16_t *pulses, size_t length,
+                      size_t repeats = 10);
 
   /**
    * Transmit Pilight json message
    */
-  int send(const String &protocol, const String &json, int repeats = 10);
+  int send(const String &protocol, const String &json, size_t repeats = 10);
 
   /**
    * Parse pulse train and fire callback
    */
-  int parsePulseTrain(uint16_t *pulses, int length);
+  size_t parsePulseTrain(uint16_t *pulses, uint8_t length);
 
   /**
    * Process receiver queue and fire callback
@@ -85,13 +88,13 @@ class ESPiLight {
    * Get last received PulseTrain.
    * Returns: length of PulseTrain or 0 if not avaiable
    */
-  static int receivePulseTrain(uint16_t *pulses);
+  static uint8_t receivePulseTrain(uint16_t *pulses);
 
   /**
    * Check if new PulseTrain avaiable.
    * Returns: 0 if no new PulseTrain avaiable
    */
-  static int nextPulseTrainLength();
+  static uint8_t nextPulseTrainLength();
 
   /**
    * Enable Receiver. No need to call enableReceiver() after initReceiver().
@@ -129,14 +132,14 @@ class ESPiLight {
    */
   static String enabledProtocols();
 
-  static unsigned int minrawlen;
-  static unsigned int maxrawlen;
-  static unsigned int mingaplen;
-  static unsigned int maxgaplen;
+  static uint8_t minrawlen;
+  static uint8_t maxrawlen;
+  static uint16_t mingaplen;
+  static uint16_t maxgaplen;
 
-  static String pulseTrainToString(const uint16_t *pulses, int length);
+  static String pulseTrainToString(const uint16_t *pulses, size_t length);
   static int stringToPulseTrain(const String &data, uint16_t *pulses,
-                                int maxlength);
+                                size_t maxlength);
 
   static int createPulseTrain(uint16_t *pulses, const String &protocol_id,
                               const String &json);
@@ -161,10 +164,11 @@ class ESPiLight {
                                  // enabled. If false, interruptHandler will
                                  // return immediately.
   static volatile PulseTrain_t _pulseTrains[];
-  static volatile int _actualPulseTrain;
-  static int _avaiablePulseTrain;
+  static volatile uint8_t _actualPulseTrain;
+  static uint8_t _avaiablePulseTrain;
   static volatile unsigned long _lastChange;  // Timestamp of previous edge
   static volatile uint8_t _nrpulses;
+  static int16_t _interrupt;
 };
 
 #endif
