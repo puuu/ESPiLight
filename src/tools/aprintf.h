@@ -19,25 +19,24 @@
 #ifndef _APRINTF_H_
 #define _APRINTF_H_
 
-#include <stdio.h>
+#include <pgmspace.h>
 
 #ifndef __cplusplus
-#include <pgmspace.h>
-#define FSTR(s)                            \
-  (__extension__({                         \
-    static const char __c[] PROGMEM = (s); \
-    &__c[0];                               \
-  }))
-#define printf(fmt, ...) printf(FSTR(fmt), ##__VA_ARGS__)
-#define fprintf(stream, args...) printf(args)
-#else
-#define fprintf(stream, args...) printf(args)
+#include <stdio.h>
+#define fprintf(stream, fmt, ...) aprintf_P(PSTR(fmt), ##__VA_ARGS__)
+#define printf(fmt, ...) aprintf_P(PSTR(fmt), ##__VA_ARGS__)
+#endif
+
+#ifdef __cplusplus
+#include <Print.h>
+void set_aprintf_output(Print *output);
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 void exit(int n);
+int aprintf_P(PGM_P formatP, ...) __attribute__((format(printf, 1, 2)));
 #ifdef __cplusplus
 }
 #endif
