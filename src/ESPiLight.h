@@ -132,6 +132,11 @@ class ESPiLight {
    */
   static String enabledProtocols();
 
+  /**
+   * Set pilight error output Print class (default is Serial)
+   */
+  static void setErrorOutput(Print &output);
+
   static uint8_t minrawlen;
   static uint8_t maxrawlen;
   static uint16_t mingaplen;

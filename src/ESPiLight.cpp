@@ -17,6 +17,7 @@
 */
 
 #include <ESPiLight.h>
+#include "tools/aprintf.h"
 
 // ESP32 doesn't define ICACHE_RAM_ATTR
 #ifndef ICACHE_RAM_ATTR
@@ -174,6 +175,7 @@ ESPiLight::ESPiLight(int8_t outputPin) {
   }
 
   if (protocols == nullptr) {
+    setErrorOutput(Serial);
     protocol_init();
 
     used_protocols = protocols;
@@ -557,3 +559,5 @@ String ESPiLight::enabledProtocols() {
 }
 
 void ESPiLight::setEchoEnabled(bool enabled) { _echoEnabled = enabled; }
+
+void ESPiLight::setErrorOutput(Print &output) { set_aprintf_output(&output); }
