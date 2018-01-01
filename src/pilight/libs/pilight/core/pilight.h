@@ -19,8 +19,6 @@
 #ifndef _PILIGHT_H_
 #define _PILIGHT_H_
 
-#define PILIGHT_PRINT Serial
-
 //#include "defines.h"
 #define PULSE_DIV                      34
 #define EPSILON                         0.00001
