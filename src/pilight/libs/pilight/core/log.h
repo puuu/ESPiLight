@@ -32,6 +32,6 @@
 
 #include <stdio.h>
 
-#define logprintf(prio, args...) {printf("\nLOG(%d): ", prio);printf(args);printf("\n");}
+#define logprintf(prio, args...) {printf("\npilight(%d): ", prio);printf(args);printf("\n");}
 
 #endif
