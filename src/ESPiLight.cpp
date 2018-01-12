@@ -253,8 +253,11 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
   while (pnode != nullptr) {
     protocol = pnode->listener;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
     if ((protocol->createCode != nullptr) && (protocol_id == protocol->id) &&
         (protocol->maxrawlen <= MAXPULSESTREAMLENGTH)) {
+#pragma GCC diagnostic pop
       Debug("protocol: ");
       Debug(protocol->id);
 
