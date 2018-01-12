@@ -240,7 +240,6 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
                                 const String &content) {
   protocol_t *protocol = nullptr;
   protocols_t *pnode = used_protocols;
-  int return_value = EXIT_FAILURE;
   JsonNode *message;
 
   Debug("piLightCreatePulseTrain: ");
@@ -262,7 +261,7 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
       protocol->rawlen = 0;
       protocol->raw = pulses;
       message = json_decode(content.c_str());
-      return_value = protocol->createCode(message);
+      int return_value = protocol->createCode(message);
       json_delete(message);
       // delete message created by createCode()
       json_delete(protocol->message);
