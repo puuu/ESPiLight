@@ -132,6 +132,11 @@ class ESPiLight {
    */
   static String enabledProtocols();
 
+  /**
+   * Set pilight error output Print class (default is Serial)
+   */
+  static void setErrorOutput(Print &output);
+
   static uint8_t minrawlen;
   static uint8_t maxrawlen;
   static uint16_t mingaplen;
@@ -143,6 +148,22 @@ class ESPiLight {
 
   static int createPulseTrain(uint16_t *pulses, const String &protocol_id,
                               const String &json);
+
+  /**
+   * Error return codes for send() and createPulseTrain()
+   */
+  static const int ERROR_UNAVAILABLE_PROTOCOL = 0;
+  static const int ERROR_INVALID_PILIGHT_MSG = -1;
+  static const int ERROR_INVALID_JSON = -2;
+  static const int ERROR_NO_OUTPUT_PIN = -3;
+
+  /**
+   * Error return codes for stringToPulseTrain()
+   */
+  static const int ERROR_INVALID_PULSETRAIN_MSG_C = -1;
+  static const int ERROR_INVALID_PULSETRAIN_MSG_P = -2;
+  static const int ERROR_INVALID_PULSETRAIN_MSG_END = -3;
+  static const int ERROR_INVALID_PULSETRAIN_MSG_TYPE = -4;
 
  private:
   ESPiLightCallBack _callback;

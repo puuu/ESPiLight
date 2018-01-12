@@ -17,6 +17,7 @@
 */
 
 #include <ESPiLight.h>
+#include "tools/aprintf.h"
 
 // ESP32 doesn't define ICACHE_RAM_ATTR
 #ifndef ICACHE_RAM_ATTR
@@ -174,6 +175,7 @@ ESPiLight::ESPiLight(int8_t outputPin) {
   }
 
   if (protocols == nullptr) {
+    setErrorOutput(Serial);
     protocol_init();
 
     used_protocols = protocols;
@@ -212,7 +214,7 @@ int ESPiLight::send(const String &protocol, const String &json,
                     size_t repeats) {
   if (_outputPin < 0) {
     DebugLn("No output pin set, cannot send");
-    return -1;
+    return ERROR_NO_OUTPUT_PIN;
   }
   int length = 0;
   uint16_t pulses[MAXPULSESTREAMLENGTH];
@@ -238,7 +240,6 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
                                 const String &content) {
   protocol_t *protocol = nullptr;
   protocols_t *pnode = used_protocols;
-  int return_value = EXIT_FAILURE;
   JsonNode *message;
 
   Debug("piLightCreatePulseTrain: ");
@@ -246,21 +247,24 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
   if (!json_validate(content.c_str())) {
     Debug("invalid json: ");
     DebugLn(content);
-    return -2;
+    return ERROR_INVALID_JSON;
   }
 
   while (pnode != nullptr) {
     protocol = pnode->listener;
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
     if ((protocol->createCode != nullptr) && (protocol_id == protocol->id) &&
         (protocol->maxrawlen <= MAXPULSESTREAMLENGTH)) {
+#pragma GCC diagnostic pop
       Debug("protocol: ");
       Debug(protocol->id);
 
       protocol->rawlen = 0;
       protocol->raw = pulses;
       message = json_decode(content.c_str());
-      return_value = protocol->createCode(message);
+      int return_value = protocol->createCode(message);
       json_delete(message);
       // delete message created by createCode()
       json_delete(protocol->message);
@@ -271,12 +275,12 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
         return protocol->rawlen;
       } else {
         DebugLn(" create Code failed.");
-        return -1;
+        return ERROR_INVALID_PILIGHT_MSG;
       }
     }
     pnode = pnode->next;
   }
-  return 0;
+  return ERROR_UNAVAILABLE_PROTOCOL;
 }
 
 size_t ESPiLight::parsePulseTrain(uint16_t *pulses, uint8_t length) {
@@ -420,12 +424,12 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
   int scode = data.indexOf('c') + 2;
   if (scode < 0 || (unsigned)scode > data.length()) {
     DebugLn("'c' not found in data string, or has no data");
-    return -1;
+    return ERROR_INVALID_PULSETRAIN_MSG_C;
   }
   int spulse = data.indexOf('p') + 2;
   if (spulse < 0 || (unsigned)spulse > data.length()) {
     DebugLn("'p' not found in data string, or has no data");
-    return -1;
+    return ERROR_INVALID_PULSETRAIN_MSG_P;
   }
   // parsing pulse types
   unsigned int start = (unsigned)spulse;
@@ -442,7 +446,7 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
   }
   if (end < 0) {
     DebugLn("';' or '@' not found in data string");
-    return -2;
+    return ERROR_INVALID_PULSETRAIN_MSG_END;
   }
   plstypes[nrpulses++] = (uint16_t)data.substring(start, (unsigned)end).toInt();
   // parsing pulses
@@ -453,7 +457,7 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
     pulse_index = data[i] - '0';
     if ((pulse_index < 0) || ((unsigned)pulse_index >= nrpulses)) {
       DebugLn("Pulse type not defined");
-      return -3;
+      return ERROR_INVALID_PULSETRAIN_MSG_TYPE;
     }
     codes[length++] = plstypes[pulse_index];
   }
@@ -557,3 +561,5 @@ String ESPiLight::enabledProtocols() {
 }
 
 void ESPiLight::setEchoEnabled(bool enabled) { _echoEnabled = enabled; }
+
+void ESPiLight::setErrorOutput(Print &output) { set_aprintf_output(&output); }

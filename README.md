@@ -82,6 +82,22 @@ $ make update
 ```
 
 
+#### New protocols
+
+ESPiLight only supports the 434MHz protocols supported by
+[pilight](https://pilight.org/). If you are missing any protocol,
+please report it directly to pilight. After the intergratrion into
+pilight it can be merged into ESPILight.
+
+To report new protocols, please folow the
+[rules](https://forum.pilight.org/showthread.php?tid=761) of the
+[pilight forum](https://forum.pilight.org/). It is recommended to use
+pilight directly. Alternativly, ESPiLight offers the
+[`pilight_debug`](examples/pilight_debug/pilight_debug.ino) and
+[`pilight_raw`](examples/pilight_raw/pilight_raw.ino) examples that
+mimic tht pilight counterparts.
+
+
 ## Acknowledgement
 
 Big thanks goes to the pilight community, which implemented all the
