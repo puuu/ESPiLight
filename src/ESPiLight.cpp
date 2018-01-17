@@ -504,6 +504,7 @@ void ESPiLight::limitProtocols(const String &protos) {
   while (curr != nullptr) {
     if (!curr->tag == JSON_STRING) {
       DebugLn("Element is not a String");
+      curr = curr->next;
       continue;
     }
 
@@ -511,6 +512,7 @@ void ESPiLight::limitProtocols(const String &protos) {
     if (templ == nullptr) {
       Debug("Protocol not found: ");
       DebugLn(curr->string_);
+      curr = curr->next;
       continue;
     }
 
