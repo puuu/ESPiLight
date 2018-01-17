@@ -538,18 +538,31 @@ void ESPiLight::limitProtocols(const String &protos) {
 }
 
 static String protocols_to_array(protocols_t *pnode) {
-  JsonNode *message = json_mkarray();
-
-  while (pnode != nullptr) {
-    json_append_element(message, json_mkstring(pnode->listener->id));
-    pnode = pnode->next;
+  protocols_t *tmp = pnode;
+  size_t needed_len = 2;  // []
+  while (tmp != nullptr) {
+    needed_len += strlen(tmp->listener->id) + 3;  // "xx",
+    tmp = tmp->next;
   }
 
-  char *content = json_encode(message);
-  json_delete(message);
+  String ret;
+  ret.reserve(needed_len);
 
-  String ret(content);
-  json_free(content);
+  ret += '[';
+
+  bool first = true;
+  while (pnode != nullptr) {
+    if (first) {
+      first = false;
+    } else {
+      ret += ",";
+    }
+    ret += '"';
+    ret += pnode->listener->id;
+    ret += '"';
+    pnode = pnode->next;
+  }
+  ret += "]";
 
   return ret;
 }
