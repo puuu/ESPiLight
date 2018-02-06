@@ -14,8 +14,8 @@ participate on the excellent work of the pilight community. Thus,
 supporting many protocols for rc switches and weather stations without
 reimplementing them.
 
-A list of supported protocols can be found in the pilight wiki:
-https://wiki.pilight.org/doku.php/protocols
+A list of supported protocols can be found in the pilight manual:
+https://manual.pilight.org/protocols/433.92/index.html
 
 
 ## Installation
@@ -36,8 +36,8 @@ ATmega-based boards, because of memory usage.
 
 For transmitting and receiving you need 434MHz-RF modules. More
 information can be found here:
-- https://wiki.pilight.org/doku.php/receivers
-- https://wiki.pilight.org/doku.php/senders
+- https://wiki.pilight.org/receivers
+- https://wiki.pilight.org/senders
 - https://github.com/sui77/rc-switch/wiki/List_TransmitterReceiverModules
 
 
