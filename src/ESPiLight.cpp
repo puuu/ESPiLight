@@ -54,6 +54,21 @@ uint16_t ESPiLight::maxgaplen = 10000;
 
 static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback);
 
+static protocols_t *get_protocols() {
+  if (protocols == nullptr) {
+    ESPiLight::setErrorOutput(Serial);
+    protocol_init();
+  }
+  return protocols;
+}
+
+static protocols_t *get_used_protocols() {
+  if (used_protocols == nullptr) {
+    used_protocols = get_protocols();
+  }
+  return used_protocols;
+}
+
 void ESPiLight::initReceiver(byte inputPin) {
   int16_t interrupt = digitalPinToInterrupt(inputPin);
   if (_interrupt == interrupt) {
@@ -174,12 +189,7 @@ ESPiLight::ESPiLight(int8_t outputPin) {
     digitalWrite((uint8_t)_outputPin, LOW);
   }
 
-  if (protocols == nullptr) {
-    setErrorOutput(Serial);
-    protocol_init();
-
-    used_protocols = protocols;
-  }
+  get_protocols();
 }
 
 void ESPiLight::setCallback(ESPiLightCallBack callback) {
@@ -239,7 +249,7 @@ int ESPiLight::send(const String &protocol, const String &json,
 int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
                                 const String &content) {
   protocol_t *protocol = nullptr;
-  protocols_t *pnode = used_protocols;
+  protocols_t *pnode = get_used_protocols();
   JsonNode *message;
 
   Debug("piLightCreatePulseTrain: ");
@@ -286,7 +296,7 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
 size_t ESPiLight::parsePulseTrain(uint16_t *pulses, uint8_t length) {
   size_t matches = 0;
   protocol_t *protocol = nullptr;
-  protocols_t *pnode = used_protocols;
+  protocols_t *pnode = get_used_protocols();
 
   // DebugLn("piLightParsePulseTrain start");
   while ((pnode != nullptr) && (_callback != nullptr)) {
@@ -465,7 +475,7 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
 }
 
 static protocols_t *find_proto(const char *name) {
-  protocols_t *pnode = protocols;
+  protocols_t *pnode = get_protocols();
   while (pnode != nullptr) {
     if (strcmp(name, pnode->listener->id) == 0) {
       return pnode;
@@ -488,8 +498,8 @@ void ESPiLight::limitProtocols(const String &protos) {
     return;
   }
 
-  if (used_protocols != protocols) {
-    protocols_t *pnode = used_protocols;
+  if (get_used_protocols() != get_protocols()) {
+    protocols_t *pnode = get_used_protocols();
     while (pnode != nullptr) {
       protocols_t *tmp = pnode;
       pnode = pnode->next;
@@ -531,11 +541,6 @@ void ESPiLight::limitProtocols(const String &protos) {
     curr = curr->next;
   }
 
-  // Reset if we have an empty array.
-  if (proto_count == 0) {
-    used_protocols = protocols;
-  }
-
   json_delete(message);
 }
 
@@ -569,10 +574,12 @@ static String protocols_to_array(protocols_t *pnode) {
   return ret;
 }
 
-String ESPiLight::availableProtocols() { return protocols_to_array(protocols); }
+String ESPiLight::availableProtocols() {
+  return protocols_to_array(get_protocols());
+}
 
 String ESPiLight::enabledProtocols() {
-  return protocols_to_array(used_protocols);
+  return protocols_to_array(get_used_protocols());
 }
 
 void ESPiLight::setEchoEnabled(bool enabled) { _echoEnabled = enabled; }
