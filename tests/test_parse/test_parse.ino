@@ -54,6 +54,7 @@ void setup() {
   rf.setPulseTrainCallBack(rfRawCallback);
 
   int length = 0;
+  size_t tx_rep;
   uint16_t pulses[MAXPULSESTREAMLENGTH];
 
   // print free heap memory
@@ -62,7 +63,7 @@ void setup() {
   Serial.println(ESP.getFreeHeap());
 
   // pulse train from ppilight json message
-  length = rf.createPulseTrain(pulses, PROTOCOL, JMESSAGE);
+  length = rf.createPulseTrain(pulses, PROTOCOL, JMESSAGE, &tx_rep);
   // print pulse lengths
   printPulseTrain(pulses, length);
   // format of pilight USB Nano

@@ -147,7 +147,7 @@ class ESPiLight {
                                 size_t maxlength);
 
   static int createPulseTrain(uint16_t *pulses, const String &protocol_id,
-                              const String &json);
+                              const String &json, size_t *tx_rep);
 
   /**
    * Error return codes for send() and createPulseTrain()

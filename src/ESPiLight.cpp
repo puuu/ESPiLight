@@ -227,9 +227,11 @@ int ESPiLight::send(const String &protocol, const String &json,
     return ERROR_NO_OUTPUT_PIN;
   }
   int length = 0;
+  size_t tx_rep;
   uint16_t pulses[MAXPULSESTREAMLENGTH];
 
-  length = createPulseTrain(pulses, protocol, json);
+  length = createPulseTrain(pulses, protocol, json, &tx_rep);
+  tx_rep = (repeats > tx_rep) ? repeats : tx_rep;
   if (length > 0) {
     /*
     DebugLn();
@@ -241,17 +243,18 @@ int ESPiLight::send(const String &protocol, const String &json,
     Debug(content);
     DebugLn(")");
     */
-    sendPulseTrain(pulses, (unsigned)length, repeats);
+    sendPulseTrain(pulses, (unsigned)length, tx_rep);
   }
   return length;
 }
 
 int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
-                                const String &content) {
+                                const String &content, size_t *tx_rep) {
   protocol_t *protocol = nullptr;
   protocols_t *pnode = get_used_protocols();
   JsonNode *message;
 
+  *tx_rep = 0;
   Debug("piLightCreatePulseTrain: ");
 
   if (!json_validate(content.c_str())) {
@@ -282,6 +285,7 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
 
       if (return_value == EXIT_SUCCESS) {
         DebugLn(" create Code succeded.");
+        *tx_rep = protocol->txrpt;
         return protocol->rawlen;
       } else {
         DebugLn(" create Code failed.");
