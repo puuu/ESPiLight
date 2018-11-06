@@ -1267,7 +1267,11 @@ static void emit_number(SB *out, double num, int decimals)
 	 * like 0.3 -> 0.299999999999999988898 .
 	 */
 	char buf[64];
+#ifdef ESP8266
 	dtostrf(num, 0, decimals, buf);
+#else
+	sprintf(buf, "%.*f", decimals, num);
+#endif
 
 	if (number_is_valid(buf))
 		sb_puts(out, buf);
