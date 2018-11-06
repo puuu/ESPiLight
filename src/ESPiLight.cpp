@@ -36,7 +36,7 @@ extern "C" {
 #include "pilight/libs/pilight/protocols/protocol.h"
 }
 protocols_t *protocols = nullptr;
-protocols_t *used_protocols = nullptr;
+static protocols_t *used_protocols = nullptr;
 
 volatile PulseTrain_t ESPiLight::_pulseTrains[RECEIVER_BUFFER_SIZE];
 bool ESPiLight::_enabledReceiver;
