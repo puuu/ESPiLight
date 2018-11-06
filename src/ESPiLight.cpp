@@ -35,7 +35,6 @@
 extern "C" {
 #include "pilight/libs/pilight/protocols/protocol.h"
 }
-protocols_t *protocols = nullptr;
 static protocols_t *used_protocols = nullptr;
 
 volatile PulseTrain_t ESPiLight::_pulseTrains[RECEIVER_BUFFER_SIZE];
@@ -55,11 +54,11 @@ uint16_t ESPiLight::maxgaplen = 10000;
 static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback);
 
 static protocols_t *get_protocols() {
-  if (protocols == nullptr) {
+  if (pilight_protocols == nullptr) {
     ESPiLight::setErrorOutput(Serial);
     protocol_init();
   }
-  return protocols;
+  return pilight_protocols;
 }
 
 static protocols_t *get_used_protocols() {
