@@ -512,7 +512,7 @@ void ESPiLight::limitProtocols(const String &protos) {
   unsigned int proto_count = 0;
 
   while (curr != nullptr) {
-    if (!curr->tag == JSON_STRING) {
+    if (curr->tag != JSON_STRING) {
       DebugLn("Element is not a String");
       curr = curr->next;
       continue;
