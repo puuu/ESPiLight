@@ -285,7 +285,8 @@ int ESPiLight::send(const String &protocol, const String &json,
   int length = 0;
   uint16_t pulses[MAXPULSESTREAMLENGTH];
 
-  length = createPulseTrain(pulses, protocol, json);
+  protocol_t *protocol_listener = find_protocol(protocol.c_str());
+  length = create_pulse_train(pulses, protocol_listener, json);
   if (length > 0) {
     /*
     DebugLn();
@@ -297,6 +298,9 @@ int ESPiLight::send(const String &protocol, const String &json,
     Debug(content);
     DebugLn(")");
     */
+    if (repeats == 0) {
+      repeats = protocol_listener->txrpt;
+    }
     sendPulseTrain(pulses, (unsigned)length, repeats);
   }
   return length;
