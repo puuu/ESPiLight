@@ -266,10 +266,6 @@ int ESPiLight::send(const String &protocol, const String &json,
 
 int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
                                 const String &content) {
-  protocol_t *protocol = nullptr;
-  protocols_t *pnode = get_used_protocols();
-  JsonNode *message;
-
   Debug("piLightCreatePulseTrain: ");
 
   if (!json_validate(content.c_str())) {
@@ -278,35 +274,31 @@ int ESPiLight::createPulseTrain(uint16_t *pulses, const String &protocol_id,
     return ERROR_INVALID_JSON;
   }
 
-  while (pnode != nullptr) {
-    protocol = pnode->listener;
-
+  protocol_t *protocol = find_protocol(protocol_id.c_str());
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wtype-limits"
-    if ((protocol->createCode != nullptr) && (protocol_id == protocol->id) &&
-        (protocol->maxrawlen <= MAXPULSESTREAMLENGTH)) {
+  if ((protocol != nullptr) && (protocol->createCode != nullptr) &&
+      (protocol->maxrawlen <= MAXPULSESTREAMLENGTH)) {
 #pragma GCC diagnostic pop
-      Debug("protocol: ");
-      Debug(protocol->id);
+    Debug("protocol: ");
+    Debug(protocol->id);
 
-      protocol->rawlen = 0;
-      protocol->raw = pulses;
-      message = json_decode(content.c_str());
-      int return_value = protocol->createCode(message);
-      json_delete(message);
-      // delete message created by createCode()
-      json_delete(protocol->message);
-      protocol->message = nullptr;
+    protocol->rawlen = 0;
+    protocol->raw = pulses;
+    JsonNode *message = json_decode(content.c_str());
+    int return_value = protocol->createCode(message);
+    json_delete(message);
+    // delete message created by createCode()
+    json_delete(protocol->message);
+    protocol->message = nullptr;
 
-      if (return_value == EXIT_SUCCESS) {
-        DebugLn(" create Code succeded.");
-        return protocol->rawlen;
-      } else {
-        DebugLn(" create Code failed.");
-        return ERROR_INVALID_PILIGHT_MSG;
-      }
+    if (return_value == EXIT_SUCCESS) {
+      DebugLn(" create Code succeded.");
+      return protocol->rawlen;
+    } else {
+      DebugLn(" create Code failed.");
+      return ERROR_INVALID_PILIGHT_MSG;
     }
-    pnode = pnode->next;
   }
   return ERROR_UNAVAILABLE_PROTOCOL;
 }
