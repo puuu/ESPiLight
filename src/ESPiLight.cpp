@@ -68,6 +68,17 @@ static protocols_t *get_used_protocols() {
   return used_protocols;
 }
 
+static protocols_t *find_protocol_node(const char *name) {
+  protocols_t *pnode = get_protocols();
+  while (pnode != nullptr) {
+    if (strcmp(name, pnode->listener->id) == 0) {
+      return pnode;
+    }
+    pnode = pnode->next;
+  }
+  return nullptr;
+}
+
 void ESPiLight::initReceiver(byte inputPin) {
   int16_t interrupt = digitalPinToInterrupt(inputPin);
   if (_interrupt == interrupt) {
@@ -473,17 +484,6 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
   return length;
 }
 
-static protocols_t *find_proto(const char *name) {
-  protocols_t *pnode = get_protocols();
-  while (pnode != nullptr) {
-    if (strcmp(name, pnode->listener->id) == 0) {
-      return pnode;
-    }
-    pnode = pnode->next;
-  }
-  return nullptr;
-}
-
 void ESPiLight::limitProtocols(const String &protos) {
   if (!json_validate(protos.c_str())) {
     DebugLn("Protocol limit argument is not a valid json message!");
@@ -517,7 +517,7 @@ void ESPiLight::limitProtocols(const String &protos) {
       continue;
     }
 
-    protocols_t *templ = find_proto(curr->string_);
+    protocols_t *templ = find_protocol_node(curr->string_);
     if (templ == nullptr) {
       Debug("Protocol not found: ");
       DebugLn(curr->string_);
