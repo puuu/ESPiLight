@@ -79,6 +79,14 @@ static protocols_t *find_protocol_node(const char *name) {
   return nullptr;
 }
 
+static protocol_t *find_protocol(const char *name) {
+  protocols_t *pnode = find_protocol_node(name);
+  if (pnode != nullptr) {
+    return pnode->listener;
+  }
+  return nullptr;
+}
+
 void ESPiLight::initReceiver(byte inputPin) {
   int16_t interrupt = digitalPinToInterrupt(inputPin);
   if (_interrupt == interrupt) {
