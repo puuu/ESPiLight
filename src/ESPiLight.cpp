@@ -359,9 +359,9 @@ static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback) {
     status = FIRST;
     json_free(protocol->old_content);
     protocol->old_content = content;
-  } else if (protocol->repeats < 100) {
+  } else if (!(protocol->repeats & 0x80)) {
     if (strcmp(content, protocol->old_content) == 0) {
-      protocol->repeats += 100;
+      protocol->repeats |= 0x80;
       status = VALID;
     } else {
       status = INVALID;
@@ -378,7 +378,7 @@ static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback) {
     deviceId = String(stmp);
   };
   (callback)(String(protocol->id), String(protocol->old_content), status,
-             protocol->repeats, deviceId);
+             protocol->repeats & 0x7F, deviceId);
 }
 
 String ESPiLight::pulseTrainToString(const uint16_t *codes, size_t length) {
