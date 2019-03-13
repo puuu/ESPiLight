@@ -167,31 +167,37 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
   }
 
   unsigned long now = micros();
-  unsigned int duration = 0;
 
   volatile PulseTrain_t &pulseTrain = _pulseTrains[_actualPulseTrain];
   volatile uint16_t *codes = pulseTrain.pulses;
 
   if (pulseTrain.length == 0) {
-    duration = now - _lastChange;
+    bool forceNewPulseTrain = false;
+    unsigned long duration = now - _lastChange;
     /* We first do some filtering (same as pilight BPF) */
     if (duration > MIN_PULSELENGTH) {
       if (duration < MAX_PULSELENGTH) {
         /* All codes are buffered */
-        codes[_nrpulses] = (uint16_t)duration;
-        _nrpulses = (uint8_t)((_nrpulses + 1) % MAXPULSESTREAMLENGTH);
-        /* Let's match footers */
-        if (duration > mingaplen) {
-          // Debug('g');
-          /* Only match minimal length pulse streams */
-          if (_nrpulses >= minrawlen && _nrpulses <= maxrawlen) {
-            // Debug(_nrpulses);
-            // Debug('l');
-            pulseTrain.length = _nrpulses;
-            _actualPulseTrain = (_actualPulseTrain + 1) % RECEIVER_BUFFER_SIZE;
-          }
-          _nrpulses = 0;
+        codes[_nrpulses++] = (uint16_t)duration;
+        if ((duration > mingaplen) || (_nrpulses >= MAXPULSESTREAMLENGTH)) {
+          forceNewPulseTrain = true;
         }
+      } else {
+        forceNewPulseTrain = true;
+      }
+      if (forceNewPulseTrain) {
+        // Debug('g');
+        /* Only match minimal length pulse streams */
+        if (_nrpulses >= minrawlen && _nrpulses <= maxrawlen) {
+          // Debug(_nrpulses);
+          // Debug('l');
+          pulseTrain.length = _nrpulses;
+          _actualPulseTrain += 1;
+          if (_actualPulseTrain >= RECEIVER_BUFFER_SIZE) {
+            _actualPulseTrain = 0;
+          }
+        }
+        _nrpulses = 0;
       }
       _lastChange = now;
     }
