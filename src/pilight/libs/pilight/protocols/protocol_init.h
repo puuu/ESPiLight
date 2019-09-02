@@ -25,6 +25,7 @@ eurodomestSwitchInit();
 ev1527Init();
 heitechInit();
 impulsInit();
+iwds07Init();
 keruiD026Init();
 logilinkSwitchInit();
 mumbiInit();

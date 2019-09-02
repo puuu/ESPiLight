@@ -17,7 +17,6 @@
 #include "../../core/log.h"
 #include "../protocol.h"
 #include "../../core/binary.h"
-#include "../../core/gc.h"
 #include "tfa2017.h"
 
 #define MIN_PULSE_LENGTH	250
@@ -57,20 +56,20 @@ static void parseCode(void) {
 	for(x=0;x<tfa2017->rawlen;x++) {
 		if(tfa2017->raw[x] > AVG_PULSE) {
 			binary[i++] = 0;
-			if(short_pulse>0) {
+			if(short_pulse > 0) {
 				prev = short_pulse;
 				short_pulse = 0;
 			}
 			long_pulse++;
 		} else {
 			short_pulse++;
-			if(short_pulse%2 == 0) {
+			if(short_pulse % 2 == 0) {
 				binary[i++] = 1;
 			}
 			long_pulse = 0;
 		}
-		if(long_pulse == 4 && (prev == 20 || (x > 7 && prev == x-1))) {
-			if (s==0 || i > start[s-1]+MESSAGE_LENGTH) {
+		if(long_pulse == 4 && (prev == 20 || (x > 7 && prev == (x - 1)))) {
+			if(s == 0 || i > (start[s-1] + MESSAGE_LENGTH)) {
 				start[s++] = i-2;
 				prev = 0;
 			}
@@ -81,12 +80,16 @@ static void parseCode(void) {
 	if(s < 2) {
 		return;
 	}
-	if(i > start[1]+MESSAGE_LENGTH && memcmp(&binary[start[0]], &binary[start[1]], MESSAGE_LENGTH) == 0) {
+
+	if(i > (start[1] + MESSAGE_LENGTH) && memcmp(&binary[start[0]], &binary[start[1]], MESSAGE_LENGTH) == 0) {
 		m=start[0];
-	} else if(s > 2 && i > start[2]+MESSAGE_LENGTH &&
-				(memcmp(&binary[start[0]], &binary[start[2]], MESSAGE_LENGTH) == 0 ||
-					memcmp(&binary[start[1]], &binary[start[2]], MESSAGE_LENGTH) == 0)) {
-		m=start[2];
+	} else if(s > 2 && i > (start[2] + MESSAGE_LENGTH)) {
+		if(memcmp(&binary[start[0]], &binary[start[2]], MESSAGE_LENGTH) == 0 ||
+			 memcmp(&binary[start[1]], &binary[start[2]], MESSAGE_LENGTH) == 0) {
+			m = start[2];
+		} else {
+			return;
+		}
 	} else {
 		return;
 	}
@@ -99,22 +102,30 @@ static void parseCode(void) {
 		}
 		msg[x] = prev;
 	}
-	// According to http://www.osengr.org/WxShield/Downloads/Weather-Sensor-RF-Protocols.pdf
-	// the first byte is a fixed id (0x45), the second is a rolling code which changes on
-	// battery replacement (both are not used here).
-	// Of the next four bits the first is unused, the next three encode the channel.
+	/*
+	 * According to http://www.osengr.org/WxShield/Downloads/Weather-Sensor-RF-Protocols.pdf
+	 * the first byte is a fixed id (0x45), the second is a rolling code which changes on
+	 * battery replacement (both are not used here).
+	 * Of the next four bits the first is unused, the next three encode the channel.
+	 */
 	channel = binToDecRev(msg, 17, 19)+1;
-	// The next twelve bits encode the temperature T
-	// in tenth of degree Fahrenheit with an offset of 40.
-	// The following is a simplification of F=T/10-40 and C=(F-32)*5/9.
+	/*
+	 * The next twelve bits encode the temperature T
+	 * in tenth of degree Fahrenheit with an offset of 40.
+	 * The following is a simplification of F=T/10-40 and C=(F-32)*5/9.
+	 */
 	temperature = (double)binToDecRev(msg, 20, 31)/18.-40.;
-	// The next byte has the relative humidity in percent.
+	/*
+	 * The next byte has the relative humidity in percent.
+	 */
 	humidity = (double)binToDecRev(msg, 32, 39);
-	// The last byte contains a checksum which is not used here.
+	/*
+	 * The last byte contains a checksum which is not used here.
+	 */
 
 	struct settings_t *tmp = settings;
 	while(tmp) {
-		if(fabs(tmp->id-channel) < EPSILON){
+		if(fabs(tmp->id-channel) < EPSILON) {
 			temperature += tmp->temp;
 			humidity += tmp->humi;
 			break;

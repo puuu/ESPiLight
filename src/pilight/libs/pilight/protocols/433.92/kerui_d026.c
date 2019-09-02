@@ -17,7 +17,6 @@
 #include "../../core/log.h"
 #include "../protocol.h"
 #include "../../core/binary.h"
-#include "../../core/gc.h"
 #include "kerui_d026.h"
 
 
@@ -44,20 +43,15 @@ static void createMessage(int unitcode, int state, int state2, int state3, int s
 
 	if(state4 == 0) {
 		json_append_member(kerui_D026->message, "state", json_mkstring("opened"));
+	} else if(state == 0) {
+		json_append_member(kerui_D026->message, "state", json_mkstring("closed"));
+	} else if(state2 == 0) {
+		json_append_member(kerui_D026->message, "state", json_mkstring("tamped"));
+	} else if(state3 == 0) {
+		json_append_member(kerui_D026->message, "state", json_mkstring("not used"));
+	} else {
+		json_append_member(kerui_D026->message, "state", json_mkstring("low"));
 	}
-        else if(state == 0) {
-                json_append_member(kerui_D026->message, "state", json_mkstring("closed"));
-        }
-        else if(state2 == 0) {
-                json_append_member(kerui_D026->message, "state", json_mkstring("tamper"));
-        }
-        else if(state3 == 0) {
-                json_append_member(kerui_D026->message, "state", json_mkstring("not used"));
-        }
-	else{
-                json_append_member(kerui_D026->message, "battery", json_mkstring("low"));
-	}
-
 }
 
 static void parseCode(void) {
@@ -73,10 +67,10 @@ static void parseCode(void) {
 
 	int unitcode = binToDec(binary, 0, 19);
 	int state = binary[20];
-        int state2 = binary[21];
-        int state3 = binary[22];
-        int state4 = binary[23];
-        createMessage(unitcode, state, state2, state3, state4);
+	int state2 = binary[21];
+	int state3 = binary[22];
+	int state4 = binary[23];
+	createMessage(unitcode, state, state2, state3, state4);
 }
 
 #if !defined(MODULE) && !defined(_WIN32)
