@@ -52,11 +52,13 @@ uint16_t ESPiLight::mingaplen = 5100;
 uint16_t ESPiLight::maxgaplen = 10000;
 
 static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback);
+static void calc_mingaplen();
 
 static protocols_t *get_protocols() {
   if (pilight_protocols == nullptr) {
     ESPiLight::setErrorOutput(Serial);
     protocol_init();
+    calc_mingaplen();
   }
   return pilight_protocols;
 }
@@ -123,6 +125,21 @@ static int create_pulse_train(uint16_t *pulses, protocol_t *protocol,
     }
   }
   return ESPiLight::ERROR_UNAVAILABLE_PROTOCOL;
+}
+
+static void calc_mingaplen() {
+  protocols_t *pnode = get_used_protocols();
+  ESPiLight::mingaplen = 5100;
+  while (pnode != nullptr) {
+    if (pnode->listener->parseCode != nullptr) {
+      if (pnode->listener->mingaplen < ESPiLight::mingaplen) {
+        ESPiLight::mingaplen = pnode->listener->mingaplen;
+      }
+    }
+    pnode = pnode->next;
+  }
+  Debug("mingaplen: ");
+  DebugLn(ESPiLight::mingaplen);
 }
 
 void ESPiLight::initReceiver(byte inputPin) {
@@ -550,6 +567,7 @@ void ESPiLight::limitProtocols(const String &protos) {
   }
 
   json_delete(message);
+  calc_mingaplen();
 }
 
 static String protocols_to_array(protocols_t *pnode) {
