@@ -468,12 +468,12 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
 
   // validate data string
   int scode = data.indexOf('c') + 2;
-  if (scode < 0 || (unsigned)scode > data.length()) {
+  if (scode < 2 || (unsigned)scode > data.length()) {
     DebugLn("'c' not found in data string, or has no data");
     return ERROR_INVALID_PULSETRAIN_MSG_C;
   }
   int spulse = data.indexOf('p') + 2;
-  if (spulse < 0 || (unsigned)spulse > data.length()) {
+  if (spulse < 2 || (unsigned)spulse > data.length()) {
     DebugLn("'p' not found in data string, or has no data");
     return ERROR_INVALID_PULSETRAIN_MSG_P;
   }
