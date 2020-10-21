@@ -83,7 +83,7 @@ static int validate(void)
     return -1;
 }
 
-static void parseCode(char **message)
+static void parseCode()
 {
     int id = 0, battery = 0, channel = 0;
     double temperature = 0.0, humidity = 0.0;
@@ -148,9 +148,12 @@ static void parseCode(char **message)
     }
 
     // format the results into a JSON string
-    snprintf(*message, 255,
-             "{\"id\":%d,\"channel\":%d,\"temperature\":%.*f,\"humidity\":%.1f,\"battery\":%d}",
-             id, channel, temperature_decimals, temperature, humidity, battery);
+    nexus->message = json_mkobject();
+    json_append_member(nexus->message, "id", json_mknumber(id, 0));
+    json_append_member(nexus->message, "channel", json_mknumber(channel, 0));
+    json_append_member(nexus->message, "temperature", json_mknumber(temperature, 1));
+    json_append_member(nexus->message, "humidity", json_mknumber(humidity, 0));
+    json_append_member(nexus->message, "battery", json_mknumber(battery, 0));
 }
 
 static int checkValues(struct JsonNode *jvalues)
@@ -162,7 +165,7 @@ static int checkValues(struct JsonNode *jvalues)
         struct settings_t *snode = NULL;
         struct JsonNode *jchild = NULL;
         struct JsonNode *jchild1 = NULL;
-        double id = -1;
+        int id = -1;
         int match = 0;
 
         jchild = json_first_child(jid);
