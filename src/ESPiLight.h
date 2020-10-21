@@ -26,17 +26,22 @@
 #define RECEIVER_BUFFER_SIZE 10
 #endif
 
-#define MIN_PULSELENGTH 80
-#define MAX_PULSELENGTH 16000
 #ifndef MAXPULSESTREAMLENGTH
 #define MAXPULSESTREAMLENGTH 255
 #endif
 
 #define MAX_PULSE_TYPES 16
 
-enum PilightRepeatStatus_t { FIRST, INVALID, VALID, KNOWN };
+enum PilightRepeatStatus_t
+{
+  FIRST,
+  INVALID,
+  VALID,
+  KNOWN
+};
 
-typedef struct PulseTrain_t {
+typedef struct PulseTrain_t
+{
   uint16_t pulses[MAXPULSESTREAMLENGTH];
   uint8_t length;
 } PulseTrain_t;
@@ -47,8 +52,9 @@ typedef std::function<void(const String &protocol, const String &message,
 typedef std::function<void(const uint16_t *pulses, size_t length)>
     PulseTrainCallBack;
 
-class ESPiLight {
- public:
+class ESPiLight
+{
+public:
   /**
    * Constructor.
    */
@@ -146,6 +152,8 @@ class ESPiLight {
   static uint8_t maxrawlen;
   static uint16_t mingaplen;
   static uint16_t maxgaplen;
+  static uint16_t minPulseLen;
+  static uint16_t maxPulseLen;
 
   static String pulseTrainToString(const uint16_t *pulses, size_t length);
   static int stringToPulseTrain(const String &data, uint16_t *pulses,
@@ -170,7 +178,7 @@ class ESPiLight {
   static const int ERROR_INVALID_PULSETRAIN_MSG_END = -3;
   static const int ERROR_INVALID_PULSETRAIN_MSG_TYPE = -4;
 
- private:
+private:
   ESPiLightCallBack _callback;
   PulseTrainCallBack _rawCallback;
   int8_t _outputPin;
@@ -186,13 +194,13 @@ class ESPiLight {
   /**
    * Internal functions
    */
-  static bool _enabledReceiver;  // If true, monitoring and decoding is
-                                 // enabled. If false, interruptHandler will
-                                 // return immediately.
+  static bool _enabledReceiver; // If true, monitoring and decoding is
+                                // enabled. If false, interruptHandler will
+                                // return immediately.
   static volatile PulseTrain_t _pulseTrains[];
   static volatile uint8_t _actualPulseTrain;
   static uint8_t _avaiablePulseTrain;
-  static volatile unsigned long _lastChange;  // Timestamp of previous edge
+  static volatile unsigned long _lastChange; // Timestamp of previous edge
   static volatile uint8_t _nrpulses;
   static int16_t _interrupt;
 };

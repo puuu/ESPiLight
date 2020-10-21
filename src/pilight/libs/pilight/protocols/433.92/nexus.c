@@ -39,7 +39,7 @@
 #include "../protocol.h"
 #include "nexus.h"
 
-#define PULSE_TOLERANCE 320
+#define PULSE_TOLERANCE 100
 #define MESSAGE_BITS 36
 #define RAW_LENGTH (MESSAGE_BITS * 2 + 2)
 #define MAXBITS (RAW_LENGTH / 2)
@@ -248,8 +248,8 @@ nexusInit(void)
     nexus->hwtype = RF433;
     nexus->minrawlen = RAW_LENGTH;
     nexus->maxrawlen = RAW_LENGTH;
-    nexus->mingaplen = (int)((double)SYNC_P * 0.9); // minimum gap between pulse trains (sync pulse)
-    nexus->maxgaplen = (int)((double)SYNC_P * 1.1); // not used
+    nexus->mingaplen = SYNC_P - PULSE_TOLERANCE; // minimum gap between pulse trains (sync pulse)
+    nexus->maxgaplen = SYNC_P + PULSE_TOLERANCE; // not used
 
     options_add(&nexus->options, "i", "id", OPTION_HAS_VALUE, DEVICES_ID, JSON_NUMBER, NULL, "^[0-9]{1,3}$");
     options_add(&nexus->options, "c", "channel", OPTION_HAS_VALUE, DEVICES_ID, JSON_NUMBER, NULL, "^[0-3]");
