@@ -221,14 +221,13 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
     return;
   }
 
-  unsigned long now = micros();
-  unsigned int duration = 0;
-
   volatile PulseTrain_t &pulseTrain = _pulseTrains[_actualPulseTrain];
   volatile uint16_t *codes = pulseTrain.pulses;
 
   if (pulseTrain.length == 0) {
-    duration = now - _lastChange;
+    const unsigned long now = micros();
+    const unsigned int duration = now - _lastChange;
+
     /* We first do some filtering (same as pilight BPF) */
     if (duration > minpulselen) {
       if (duration < maxpulselen) {
