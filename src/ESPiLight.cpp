@@ -46,19 +46,21 @@ volatile unsigned long ESPiLight::_lastChange =
 volatile uint8_t ESPiLight::_nrpulses = 0;
 int16_t ESPiLight::_interrupt = NOT_AN_INTERRUPT;
 
-uint8_t ESPiLight::minrawlen = 5;
-uint8_t ESPiLight::maxrawlen = MAXPULSESTREAMLENGTH;
-uint16_t ESPiLight::mingaplen = 5100;
-uint16_t ESPiLight::maxgaplen = 10000;
+uint8_t ESPiLight::minrawlen = std::numeric_limits<uint8_t>::max();
+uint8_t ESPiLight::maxrawlen = std::numeric_limits<uint8_t>::min();
+uint16_t ESPiLight::mingaplen = std::numeric_limits<uint16_t>::max();
+uint16_t ESPiLight::maxgaplen = std::numeric_limits<uint16_t>::min();
+uint16_t ESPiLight::minpulselen = 80;
+uint16_t ESPiLight::maxpulselen = 16000;
 
 static void fire_callback(protocol_t *protocol, ESPiLightCallBack callback);
-static void calc_mingaplen();
+static void calc_lengths();
 
 static protocols_t *get_protocols() {
   if (pilight_protocols == nullptr) {
     ESPiLight::setErrorOutput(Serial);
     protocol_init();
-    calc_mingaplen();
+    calc_lengths();
   }
   return pilight_protocols;
 }
@@ -127,19 +129,55 @@ static int create_pulse_train(uint16_t *pulses, protocol_t *protocol,
   return ESPiLight::ERROR_UNAVAILABLE_PROTOCOL;
 }
 
-static void calc_mingaplen() {
+static void calc_lengths() {
   protocols_t *pnode = get_used_protocols();
   ESPiLight::mingaplen = 5100;
   while (pnode != nullptr) {
     if (pnode->listener->parseCode != nullptr) {
-      if (pnode->listener->mingaplen < ESPiLight::mingaplen) {
-        ESPiLight::mingaplen = pnode->listener->mingaplen;
+      const protocol_t *protocol = pnode->listener;
+      const uint8_t minLen = protocol->minrawlen;
+      const uint8_t maxLen = protocol->maxrawlen;
+      const uint16_t minGap = protocol->mingaplen;
+      const uint16_t maxGap = protocol->maxgaplen;
+
+      if (minLen < ESPiLight::minrawlen) {
+        ESPiLight::minrawlen = minLen;
+      }
+
+      if (maxLen > ESPiLight::maxrawlen && maxLen <= MAXPULSESTREAMLENGTH) {
+        ESPiLight::maxrawlen = maxLen;
+      }
+
+      if (minGap < ESPiLight::mingaplen) {
+        ESPiLight::mingaplen = minGap;
+      }
+
+      if (maxGap > ESPiLight::maxgaplen) {
+        ESPiLight::maxgaplen = maxGap;
+      }
+
+      if (minGap < ESPiLight::minpulselen) {
+        ESPiLight::minpulselen = minGap;
+      }
+
+      if (maxGap > ESPiLight::maxpulselen) {
+        ESPiLight::maxpulselen = maxGap;
       }
     }
     pnode = pnode->next;
   }
+  Debug("minrawlen: ");
+  DebugLn(ESPiLight::minrawlen);
+  Debug("maxrawlen: ");
+  DebugLn(ESPiLight::maxrawlen);
   Debug("mingaplen: ");
   DebugLn(ESPiLight::mingaplen);
+  Debug("maxgaplen: ");
+  DebugLn(ESPiLight::maxgaplen);
+  Debug("minpulselen: ");
+  DebugLn(ESPiLight::minpulselen);
+  Debug("maxpulselen: ");
+  DebugLn(ESPiLight::maxpulselen);
 }
 
 void ESPiLight::initReceiver(byte inputPin) {
@@ -192,8 +230,8 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
   if (pulseTrain.length == 0) {
     duration = now - _lastChange;
     /* We first do some filtering (same as pilight BPF) */
-    if (duration > MIN_PULSELENGTH) {
-      if (duration < MAX_PULSELENGTH) {
+    if (duration > minpulselen) {
+      if (duration < maxpulselen) {
         /* All codes are buffered */
         codes[_nrpulses] = (uint16_t)duration;
         _nrpulses = (uint8_t)((_nrpulses + 1) % MAXPULSESTREAMLENGTH);
@@ -567,7 +605,7 @@ void ESPiLight::limitProtocols(const String &protos) {
   }
 
   json_delete(message);
-  calc_mingaplen();
+  calc_lengths();
 }
 
 static String protocols_to_array(protocols_t *pnode) {

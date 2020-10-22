@@ -26,8 +26,6 @@
 #define RECEIVER_BUFFER_SIZE 10
 #endif
 
-#define MIN_PULSELENGTH 80
-#define MAX_PULSELENGTH 16000
 #ifndef MAXPULSESTREAMLENGTH
 #define MAXPULSESTREAMLENGTH 255
 #endif
@@ -146,6 +144,8 @@ class ESPiLight {
   static uint8_t maxrawlen;
   static uint16_t mingaplen;
   static uint16_t maxgaplen;
+  static uint16_t minpulselen;
+  static uint16_t maxpulselen;
 
   static String pulseTrainToString(const uint16_t *pulses, size_t length);
   static int stringToPulseTrain(const String &data, uint16_t *pulses,
