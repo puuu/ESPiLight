@@ -72,6 +72,14 @@ $ make
 $ ln -s `pwd` ~/Arduino/libraries/
 ```
 
+On MacOS you can run:
+```console
+$ git clone https://github.com/puuu/ESPiLight/
+$ cd ESPiLight
+$ make
+$ ln -s `pwd` ~/Documents/Arduino/libraries/
+```
+
 
 #### Update
 
