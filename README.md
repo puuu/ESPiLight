@@ -83,7 +83,7 @@ $ ln -s `pwd` ~/Documents/Arduino/libraries/
 
 #### Update
 
-To update EPiLight from git run:
+To update ESPiLight from git run:
 ```console
 $ git pull
 $ make update
