@@ -131,7 +131,12 @@ static int create_pulse_train(uint16_t *pulses, protocol_t *protocol,
 
 static void calc_lengths() {
   protocols_t *pnode = get_used_protocols();
-  ESPiLight::mingaplen = 5100;
+  ESPiLight::minrawlen = std::numeric_limits<uint8_t>::max();
+  ESPiLight::maxrawlen = std::numeric_limits<uint8_t>::min();
+  ESPiLight::mingaplen = std::numeric_limits<uint16_t>::max();
+  ESPiLight::maxgaplen = std::numeric_limits<uint16_t>::min();
+  ESPiLight::minpulselen = 80;
+  ESPiLight::maxpulselen = 16000;
   while (pnode != nullptr) {
     if (pnode->listener->parseCode != nullptr) {
       const protocol_t *protocol = pnode->listener;
