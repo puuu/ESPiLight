@@ -552,6 +552,25 @@ int ESPiLight::stringToPulseTrain(const String &data, uint16_t *codes,
   return length;
 }
 
+int ESPiLight::stringToRepeats(const String &data) {
+  // parsing (optional) repeats
+  int srepeat = data.indexOf('r') + 2;
+  if (srepeat < 2 || (unsigned)srepeat > data.length()) {
+    DebugLn("'r' not found in data string, or has no data");
+    return ERROR_INVALID_PULSETRAIN_MSG_R;
+  }
+  unsigned int start = (unsigned)srepeat;
+  int end = data.indexOf(';', start);
+  if (end < 0) {
+    end = data.indexOf('@', start);
+  }
+  if (end < 0) {
+    DebugLn("';' or '@' not found in data string");
+    return ERROR_INVALID_PULSETRAIN_MSG_END;
+  }
+  return data.substring(start, (unsigned)end).toInt();
+}
+
 void ESPiLight::limitProtocols(const String &protos) {
   if (!json_validate(protos.c_str())) {
     DebugLn("Protocol limit argument is not a valid json message!");
