@@ -27,7 +27,7 @@ void rfRawCallback(const uint16_t *codes, size_t length) {
 void rfCallback(const String &protocol, const String &message, int status,
                 size_t repeats, const String &deviceID) {
   Serial.print("parsed message [");
-  Serial.print(protocol);  // protocoll used to parse
+  Serial.print(protocol);  // protocol used to parse
   Serial.print("][");
   Serial.print(deviceID);  // value of id key in json message
   Serial.print("] (");
@@ -61,7 +61,7 @@ void setup() {
   Serial.print("Free heap: ");
   Serial.println(ESP.getFreeHeap());
 
-  // pulse train from ppilight json message
+  // pulse train from pilight json message
   length = rf.createPulseTrain(pulses, PROTOCOL, JMESSAGE);
   // print pulse lengths
   printPulseTrain(pulses, length);
@@ -90,6 +90,15 @@ void setup() {
     rf.parsePulseTrain(pulses, length);
     delay(10);
   }
+
+  // parse repeats in string
+  Serial.println();
+  data = "c:10011001100101010101100110011001100101011002;p:300,900,10200;r:17@";
+  Serial.print("string with repeats format: ");
+  Serial.println(data);
+  int repeats = rf.stringToRepeats(data);
+  Serial.print("number of repeats (should be 17): ");
+  Serial.println(repeats);
 }
 
 void loop() {
