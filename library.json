@@ -7,7 +7,7 @@
         "type": "git",
         "url": "https://github.com/puuu/ESPiLight.git"
     },
-    "version": "0.16.2",
+    "version": "0.17.0",
     "license": "GPL-3.0",
     "frameworks": "arduino",
     "platforms":
