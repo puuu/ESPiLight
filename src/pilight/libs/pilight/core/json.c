@@ -39,9 +39,9 @@
 /* Sadly, strdup is not portable. */
 static char *json_strdup(const char *str)
 {
-	char *ret = (char*) malloc(strlen(str) + 1);
+	char *ret = (char*) MALLOC(strlen(str) + 1);
 	if (ret == NULL)
-		out_of_memory();
+		out_of_memory(); /*LCOV_EXCL_LINE*/
 	memset(ret, 0, strlen(str) + 1);
 	strcpy(ret, str);
 	return ret;
@@ -58,10 +58,10 @@ typedef struct
 
 static void sb_init(SB *sb)
 {
-	sb->start = (char*) malloc(17);
+	sb->start = (char*) MALLOC(17);
 	memset(sb->start, 0, 17);
 	if (sb->start == NULL)
-		out_of_memory();
+		out_of_memory(); /*LCOV_EXCL_LINE*/
 	sb->cur = sb->start;
 	sb->end = sb->start + 16;
 }
@@ -81,9 +81,9 @@ static void sb_grow(SB *sb, int need)
 		alloc *= 2;
 	} while (alloc < length + need);
 
-	sb->start = (char*) realloc(sb->start, alloc + 1);
+	sb->start = (char*) REALLOC(sb->start, alloc + 1);
 	if (sb->start == NULL)
-		out_of_memory();
+		out_of_memory(); /*LCOV_EXCL_LINE*/
 	sb->cur = sb->start + length;
 	sb->end = sb->start + alloc;
 }
@@ -115,7 +115,7 @@ static char *sb_finish(SB *sb)
 
 static void sb_free(SB *sb)
 {
-	free(sb->start);
+	FREE(sb->start);
 }
 
 /*
@@ -207,7 +207,7 @@ static int utf8_validate_cz(const char *s)
 }
 
 /* Validate a null-terminated UTF-8 string. */
-static bool utf8_validate(const char *s)
+bool utf8_validate(const char *s)
 {
 	int len;
 
@@ -415,7 +415,7 @@ void json_delete(JsonNode *node)
 
 		switch (node->tag) {
 			case JSON_STRING:
-				free(node->string_);
+				FREE(node->string_);
 				break;
 			case JSON_ARRAY:
 			case JSON_OBJECT:
@@ -430,7 +430,7 @@ void json_delete(JsonNode *node)
 			default:;
 		}
 
-		free(node);
+		FREE(node);
 	}
 }
 
@@ -439,12 +439,14 @@ bool json_validate(const char *json)
 	const char *s = json;
 
 	skip_space(&s);
-	if (!parse_value(&s, NULL))
+	if (!parse_value(&s, NULL)) {
 		return false;
+	}
 
 	skip_space(&s);
-	if (*s != 0)
+	if (*s != 0) {
 		return false;
+	}
 
 	return true;
 }
@@ -489,9 +491,9 @@ JsonNode *json_first_child(const JsonNode *node)
 
 static JsonNode *mknode(JsonTag tag)
 {
-	JsonNode *ret = (JsonNode*) calloc(1, sizeof(JsonNode));
+	JsonNode *ret = (JsonNode*) CALLOC(1, sizeof(JsonNode));
 	if (ret == NULL)
-		out_of_memory();
+		out_of_memory(); /*LCOV_EXCL_LINE*/
 	ret->tag = tag;
 	return ret;
 }
@@ -617,7 +619,9 @@ void json_remove_from_parent(JsonNode *node)
 		else
 			parent->children.tail = node->prev;
 
-		free(node->key);
+		if(node->key != NULL) {
+			FREE(node->key);
+		}
 
 		node->parent = NULL;
 		node->prev = node->next = NULL;
@@ -790,7 +794,7 @@ success:
 
 failure_free_key:
 	if (out)
-		free(key);
+		FREE(key);
 failure:
 	json_delete(ret);
 	return false;
@@ -1439,5 +1443,15 @@ int json_find_string(JsonNode *object, const char *name, char **out) {
 }
 
 void json_free(void *a) {
-	free(a);
+	FREE(a);
+}
+
+int json_clone(struct JsonNode *a, struct JsonNode **b) {
+	if(*b != NULL) {
+		json_delete(*b);
+	}
+	char *out = json_stringify(a, NULL);
+	*b = json_decode(out);
+	json_free(out);
+	return 0;
 }
