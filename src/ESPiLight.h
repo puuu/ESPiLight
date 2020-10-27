@@ -26,8 +26,6 @@
 #define RECEIVER_BUFFER_SIZE 10
 #endif
 
-#define MIN_PULSELENGTH 80
-#define MAX_PULSELENGTH 16000
 #ifndef MAXPULSESTREAMLENGTH
 #define MAXPULSESTREAMLENGTH 255
 #endif
@@ -146,10 +144,13 @@ class ESPiLight {
   static uint8_t maxrawlen;
   static uint16_t mingaplen;
   static uint16_t maxgaplen;
+  static uint16_t minpulselen;
+  static uint16_t maxpulselen;
 
   static String pulseTrainToString(const uint16_t *pulses, size_t length);
   static int stringToPulseTrain(const String &data, uint16_t *pulses,
                                 size_t maxlength);
+  static int stringToRepeats(const String &data);
 
   static int createPulseTrain(uint16_t *pulses, const String &protocol_id,
                               const String &json);
@@ -169,6 +170,7 @@ class ESPiLight {
   static const int ERROR_INVALID_PULSETRAIN_MSG_P = -2;
   static const int ERROR_INVALID_PULSETRAIN_MSG_END = -3;
   static const int ERROR_INVALID_PULSETRAIN_MSG_TYPE = -4;
+  static const int ERROR_INVALID_PULSETRAIN_MSG_R = -5;
 
  private:
   ESPiLightCallBack _callback;
