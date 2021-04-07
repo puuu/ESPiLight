@@ -231,7 +231,7 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
 
   if (pulseTrain.length == 0) {
     const unsigned long now = micros();
-    if (now > _lastChange) { // prevent overflow after 70 minutes
+    if (now > _lastChange) {  // prevent overflow after 70 minutes
       const unsigned long duration = now - _lastChange;
 
       /* We first do some filtering (same as pilight BPF) */
@@ -248,7 +248,8 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
               // Debug(_nrpulses);
               // Debug('l');
               pulseTrain.length = _nrpulses;
-              _actualPulseTrain = (_actualPulseTrain + 1) % RECEIVER_BUFFER_SIZE;
+              _actualPulseTrain =
+                  (_actualPulseTrain + 1) % RECEIVER_BUFFER_SIZE;
             }
             _nrpulses = 0;
           }
@@ -401,7 +402,8 @@ size_t ESPiLight::parsePulseTrain(uint16_t *pulses, uint8_t length) {
         }
 
         /* Reset # of repeats after a certain delay */
-        if (protocol->second < protocol->first || (protocol->second - protocol->first) > 500000) {
+        if (protocol->second < protocol->first ||
+            (protocol->second - protocol->first) > 500000) {
           protocol->repeats = 0;
         }
 
