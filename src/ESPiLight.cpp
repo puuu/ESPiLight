@@ -231,29 +231,32 @@ void ICACHE_RAM_ATTR ESPiLight::interruptHandler() {
 
   if (pulseTrain.length == 0) {
     const unsigned long now = micros();
-    const unsigned int duration = now - _lastChange;
+    if (now > _lastChange) {  // prevent overflow after 70 minutes
+      const unsigned long duration = now - _lastChange;
 
-    /* We first do some filtering (same as pilight BPF) */
-    if (duration > minpulselen) {
-      if (duration < maxpulselen) {
-        /* All codes are buffered */
-        codes[_nrpulses] = (uint16_t)duration;
-        _nrpulses = (uint8_t)((_nrpulses + 1) % MAXPULSESTREAMLENGTH);
-        /* Let's match footers */
-        if (duration > mingaplen) {
-          // Debug('g');
-          /* Only match minimal length pulse streams */
-          if (_nrpulses >= minrawlen && _nrpulses <= maxrawlen) {
-            // Debug(_nrpulses);
-            // Debug('l');
-            pulseTrain.length = _nrpulses;
-            _actualPulseTrain = (_actualPulseTrain + 1) % RECEIVER_BUFFER_SIZE;
+      /* We first do some filtering (same as pilight BPF) */
+      if (duration > minpulselen) {
+        if (duration < maxpulselen) {
+          /* All codes are buffered */
+          codes[_nrpulses] = (uint16_t)duration;
+          _nrpulses = (uint8_t)((_nrpulses + 1) % MAXPULSESTREAMLENGTH);
+          /* Let's match footers */
+          if (duration > mingaplen) {
+            // Debug('g');
+            /* Only match minimal length pulse streams */
+            if (_nrpulses >= minrawlen && _nrpulses <= maxrawlen) {
+              // Debug(_nrpulses);
+              // Debug('l');
+              pulseTrain.length = _nrpulses;
+              _actualPulseTrain =
+                  (_actualPulseTrain + 1) % RECEIVER_BUFFER_SIZE;
+            }
+            _nrpulses = 0;
           }
-          _nrpulses = 0;
         }
       }
-      _lastChange = now;
     }
+    _lastChange = now;
   } else {
     Debug("_!_");
   }
@@ -399,7 +402,8 @@ size_t ESPiLight::parsePulseTrain(uint16_t *pulses, uint8_t length) {
         }
 
         /* Reset # of repeats after a certain delay */
-        if ((protocol->second - protocol->first) > 500000) {
+        if (protocol->second < protocol->first ||
+            (protocol->second - protocol->first) > 500000) {
           protocol->repeats = 0;
         }
 
@@ -417,6 +421,7 @@ size_t ESPiLight::parsePulseTrain(uint16_t *pulses, uint8_t length) {
       }
     }
     pnode = pnode->next;
+    yield();
   }
   if (_rawCallback != nullptr) {
     (_rawCallback)(pulses, length);
