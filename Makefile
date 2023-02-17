@@ -24,6 +24,7 @@ PROTOCOLS = $(patsubst $(SRC_DIR)/$(PROTOCOL_DIR)/%.h,%,$(sort $(wildcard $(SRC_
 PILIGHT_FILES = libs/pilight/core/dso.h libs/pilight/core/mem.h	\
 	libs/pilight/core/json.h libs/pilight/core/json.c	\
 	libs/pilight/core/binary.h libs/pilight/core/binary.c	\
+	libs/backtrace/backtrace-supported.h libs/backtrace/backtrace.h	\
 	libs/pilight/protocols/protocol_header.h		\
 	libs/pilight/protocols/protocol_init.h
 PROTOCOL_H_FILES = $(foreach protocol,$(PROTOCOLS),$(PROTOCOL_DIR)/$(protocol).h)
